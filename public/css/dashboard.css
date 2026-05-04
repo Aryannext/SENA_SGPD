@@ -1,0 +1,133 @@
+/* Dashboard-specific styles */
+.chart-container { position: relative; }
+
+.stat-card .stat-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 8px;
+    padding: 2px 8px;
+    border-radius: 50px;
+}
+
+.stat-trend.up   { color: var(--accent); background: var(--accent-glow); }
+.stat-trend.down { color: var(--danger); background: var(--danger-soft); }
+
+/* Inline progress in table */
+.progress-inline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.progress-inline .progress {
+    flex: 1;
+    height: 6px;
+}
+
+.progress-inline .progress-label {
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 40px;
+    text-align: right;
+    color: var(--text-primary);
+}
+
+/* Fase cards */
+.fase-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    transition: all var(--transition);
+}
+
+.fase-card:hover {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-glow);
+}
+
+.fase-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.fase-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-bright);
+}
+
+.fase-badge {
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 50px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.fase-stats {
+    display: flex;
+    gap: 20px;
+    margin-top: 16px;
+}
+
+.fase-stat {
+    text-align: center;
+}
+
+.fase-stat .value {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text-bright);
+}
+
+.fase-stat .label {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+/* Aprendiz detail cards */
+.aprendiz-profile {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 28px;
+}
+
+.aprendiz-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), #10b981);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 800;
+    color: #fff;
+}
+
+.aprendiz-info h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-bright);
+    margin-bottom: 4px;
+}
+
+.aprendiz-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.aprendiz-meta span i {
+    margin-right: 4px;
+}
