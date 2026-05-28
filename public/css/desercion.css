@@ -1,0 +1,7 @@
+/* Estilos específicos para la vista de deserción */
+.table-wrapper {
+    overflow-x: auto;
+}
+#table-auditoria th, #table-auditoria td {
+    white-space: nowrap;
+}

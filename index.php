@@ -63,6 +63,13 @@ $router->post('/api/chat/send',         'App\Controllers\AIController',        '
 $router->post('/api/chat/speak',        'App\Controllers\AIController',        'speak');
 $router->post('/api/chat/clear',        'App\Controllers\AIController',        'clear');
 
+// Web routes — Deserción
+$router->get('/desercion',          'App\Controllers\DesercionController', 'index');
+
+// API routes — Deserción
+$router->get('/api/desercion/stats',    'App\Controllers\DesercionController', 'stats');
+$router->get('/api/desercion/predecir', 'App\Controllers\DesercionController', 'predecir');
+
 // ── Dispatch ────────────────────────────────────────────────────────────────
 $method = $_SERVER['REQUEST_METHOD'];
 $uri    = $_SERVER['REQUEST_URI'];

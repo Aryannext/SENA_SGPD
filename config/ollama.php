@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 return [
     'base_url'    => 'http://127.0.0.1:11434',
-    'model'       => 'qwen3:8b',
+    'model'       => 'deepseek-r1:8b',
     'temperature' => 0.3,
     'num_ctx'     => 4096,
     'system_prompt' => <<<'PROMPT'

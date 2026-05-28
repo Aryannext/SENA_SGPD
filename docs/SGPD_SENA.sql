@@ -104,3 +104,16 @@ CREATE TABLE actividad_resultado (
   FOREIGN KEY (id_actividad) REFERENCES actividad(id_actividad) ON DELETE CASCADE,
   FOREIGN KEY (id_resultado) REFERENCES resultado_aprendizaje(id_resultado) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+CREATE TABLE novedad_retiro (
+  id_novedad INT AUTO_INCREMENT PRIMARY KEY,
+  id_aprendiz INT,
+  id_funcionario INT,
+  id_fase INT,
+  motivo VARCHAR(100),
+  observaciones TEXT,
+  fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (id_aprendiz) REFERENCES aprendiz(id_aprendiz) ON DELETE CASCADE,
+  FOREIGN KEY (id_funcionario) REFERENCES funcionario(id_funcionario) ON DELETE SET NULL,
+  FOREIGN KEY (id_fase) REFERENCES fase(id_fase) ON DELETE SET NULL
+) ENGINE=InnoDB;

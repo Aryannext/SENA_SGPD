@@ -54,6 +54,10 @@ function isActive(string $path, string $currentUri, string $basePath): string {
                 <i class="fas fa-project-diagram"></i>
                 <span>Proyecto Formativo</span>
             </a>
+            <a href="<?= $basePath ?>/desercion" class="nav-item <?= isActive('/desercion', $currentUri, $basePath) ?>">
+                <i class="fas fa-chart-line"></i>
+                <span>Análisis de Deserción</span>
+            </a>
         </div>
 
         <div class="nav-section">
