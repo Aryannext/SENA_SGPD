@@ -16,8 +16,9 @@ class Calificacion extends Model
         ?string $fechaRegistro
     ): void {
         static::execute(
-            'INSERT IGNORE INTO calificacion (id_aprendiz, id_resultado, id_funcionario, jui_evaluativo, fecha_registro)
-             VALUES (?, ?, ?, ?, ?)',
+            'INSERT INTO calificacion (id_aprendiz, id_resultado, id_funcionario, jui_evaluativo, fecha_registro)
+             VALUES (?, ?, ?, ?, ?)
+             ON DUPLICATE KEY UPDATE jui_evaluativo = VALUES(jui_evaluativo), fecha_registro = VALUES(fecha_registro), id_funcionario = VALUES(id_funcionario)',
             [$idAprendiz, $idResultado, $idFuncionario, $juicio, $fechaRegistro]
         );
     }
@@ -77,8 +78,21 @@ class Calificacion extends Model
         return static::query("
             SELECT c.*, r.cod_resultado, r.nombre_resultado,
                    comp.cod_competencia, comp.nombre as nombre_competencia,
-                   f.nombre as nombre_funcionario
+                   COALESCE(
+                       f.nombre, 
+                       (
+                           SELECT f2.nombre 
+                           FROM calificacion c2 
+                           JOIN aprendiz a2 ON c2.id_aprendiz = a2.id_aprendiz
+                           JOIN funcionario f2 ON c2.id_funcionario = f2.id_funcionario
+                           WHERE a2.id_ficha = a.id_ficha 
+                             AND c2.id_resultado = c.id_resultado 
+                             AND c2.jui_evaluativo = 'APROBADO'
+                           LIMIT 1
+                       )
+                   ) as nombre_funcionario
             FROM calificacion c
+            JOIN aprendiz a ON c.id_aprendiz = a.id_aprendiz
             JOIN resultado_aprendizaje r ON c.id_resultado = r.id_resultado
             JOIN competencia comp ON r.id_competencia = comp.id_competencia
             LEFT JOIN funcionario f ON c.id_funcionario = f.id_funcionario

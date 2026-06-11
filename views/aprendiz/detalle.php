@@ -78,7 +78,7 @@ foreach ($calificaciones as $cal) {
         <div class="competencia-group" style="border-bottom:1px solid var(--border);">
             <!-- Competencia Header (clickable) -->
             <div class="competencia-header" onclick="this.parentElement.classList.toggle('open')" style="
-                padding:14px 20px;
+                padding:16px 20px;
                 display:flex;
                 align-items:center;
                 gap:12px;
@@ -92,25 +92,27 @@ foreach ($calificaciones as $cal) {
                     min-width:12px;
                 "></i>
                 <div style="flex:1;min-width:0;">
-                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                        <code style="font-size:12px;color:var(--accent);background:var(--accent)15;padding:2px 8px;border-radius:4px;">
+                    <div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+                        <code style="font-size:11px;color:#cbd5e1;background:#0f172a;border:1px solid #334155;padding:3px 8px;border-radius:6px;font-weight:600;letter-spacing:0.5px;">
                             <?= htmlspecialchars($comp['codigo']) ?>
                         </code>
-                        <span style="font-size:13px;font-weight:600;color:var(--text-primary);">
-                            <?= htmlspecialchars(mb_substr($comp['nombre'], 0, 120)) ?>
+                        <span style="font-size:13px;font-weight:500;color:var(--text-bright);line-height:1.4;flex:1;">
+                            <?= htmlspecialchars(ucfirst(mb_strtolower($comp['nombre']))) ?>
                         </span>
                     </div>
                 </div>
-                <div style="display:flex;align-items:center;gap:12px;flex-shrink:0;">
-                    <div style="width:80px;height:6px;background:var(--surface-hover);border-radius:3px;overflow:hidden;">
-                        <div style="width:<?= $pctComp ?>%;height:100%;background:<?= $pctColor ?>;border-radius:3px;transition:width 0.5s;"></div>
+                <div style="display:flex;align-items:center;gap:14px;flex-shrink:0;">
+                    <div style="width:100px;height:8px;background:var(--surface-hover);border-radius:4px;overflow:hidden;box-shadow:inset 0 1px 3px rgba(0,0,0,0.2);">
+                        <div style="width:<?= $pctComp ?>%;height:100%;background:<?= $pctColor ?>;border-radius:4px;transition:width 0.5s;"></div>
                     </div>
-                    <span style="font-size:13px;font-weight:700;color:<?= $pctColor ?>;min-width:45px;text-align:right;">
-                        <?= $pctComp ?>%
-                    </span>
-                    <span style="font-size:11px;color:var(--text-muted);min-width:30px;">
-                        <?= $comp['aprobados'] ?>/<?= $comp['total'] ?>
-                    </span>
+                    <div style="display:flex;flex-direction:column;align-items:flex-end;">
+                        <span style="font-size:13px;font-weight:700;color:<?= $pctColor ?>;line-height:1;">
+                            <?= $pctComp ?>%
+                        </span>
+                        <span style="font-size:10px;color:var(--text-muted);margin-top:2px;">
+                            <?= $comp['aprobados'] ?>/<?= $comp['total'] ?> aprobados
+                        </span>
+                    </div>
                 </div>
             </div>
 
@@ -120,7 +122,7 @@ foreach ($calificaciones as $cal) {
                 overflow:hidden;
                 transition:max-height 0.3s ease;
             ">
-                <div style="padding:0 20px 12px 44px;">
+                <div style="padding:12px 20px 20px 44px;display:flex;flex-direction:column;gap:8px;">
                     <?php foreach ($comp['resultados'] as $cal): ?>
                         <?php
                             $juicioClass = match($cal['jui_evaluativo']) {
@@ -128,26 +130,41 @@ foreach ($calificaciones as $cal) {
                                 'NO APROBADO' => 'badge-danger',
                                 default       => 'badge-warning',
                             };
+                            $nombreRes = ucfirst(mb_strtolower($cal['nombre_resultado'] ?? ''));
                         ?>
-                        <div style="
+                        <div class="resultado-row" style="
                             display:flex;
                             align-items:center;
-                            gap:12px;
-                            padding:8px 0;
-                            border-bottom:1px solid var(--border-subtle, rgba(255,255,255,0.03));
+                            gap:14px;
+                            padding:12px 16px;
+                            background:rgba(0,0,0,0.15);
+                            border-radius:8px;
+                            border:1px solid rgba(255,255,255,0.02);
                             font-size:12px;
-                        ">
-                            <code style="color:var(--text-muted);min-width:60px;font-size:11px;">
+                            transition:all 0.2s;
+                        " onmouseover="this.style.transform='translateX(4px)'; this.style.background='rgba(255,255,255,0.03)'"
+                          onmouseout="this.style.transform='translateX(0)'; this.style.background='rgba(0,0,0,0.15)'">
+                            <code style="color:#94a3b8;background:#1e293b;padding:3px 6px;border-radius:4px;min-width:60px;font-size:11px;text-align:center;border:1px solid #334155;font-weight:600;">
                                 <?= htmlspecialchars($cal['cod_resultado']) ?>
                             </code>
-                            <span style="flex:1;color:var(--text-secondary);min-width:0;overflow:hidden;text-overflow:ellipsis;">
-                                <?= htmlspecialchars(mb_substr($cal['nombre_resultado'], 0, 120)) ?>
+                            <span style="flex:1;color:var(--text-secondary);min-width:0;line-height:1.4;">
+                                <?= htmlspecialchars($nombreRes) ?>
+                                <?php if (!empty($cal['nombre_funcionario'])): ?>
+                                    <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">
+                                        <i class="fas fa-user-tie" style="margin-right:4px;"></i><?= htmlspecialchars($cal['nombre_funcionario']) ?>
+                                    </div>
+                                <?php endif; ?>
                             </span>
-                            <span class="badge <?= $juicioClass ?>" style="font-size:10px;padding:2px 8px;">
+                            <span class="badge <?= $juicioClass ?>" style="font-size:10px;padding:4px 8px;white-space:nowrap;">
                                 <?= htmlspecialchars($cal['jui_evaluativo']) ?>
                             </span>
-                            <span style="color:var(--text-muted);min-width:75px;font-size:11px;text-align:right;">
-                                <?= $cal['fecha_registro'] ? date('d/m/Y', strtotime($cal['fecha_registro'])) : '-' ?>
+                            <span style="color:var(--text-muted);min-width:90px;font-size:11px;text-align:right;white-space:nowrap;display:flex;align-items:center;justify-content:flex-end;gap:6px;">
+                                <?php if ($cal['fecha_registro']): ?>
+                                    <i class="far fa-calendar-alt" style="color:var(--accent);"></i>
+                                    <?= date('d/m/Y', strtotime($cal['fecha_registro'])) ?>
+                                <?php else: ?>
+                                    <i class="far fa-clock" style="color:var(--warning);"></i> Pendiente
+                                <?php endif; ?>
                             </span>
                         </div>
                     <?php endforeach; ?>

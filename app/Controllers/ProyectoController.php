@@ -354,6 +354,16 @@ final class ProyectoController extends Controller
             $stats = $parserService->parse($destination);
             
             $msg = "Proyecto $projCode procesado exitosamente: {$stats['fases']} fases, {$stats['actividades']} actividades, {$stats['vinculos']} vínculos RA.";
+            
+            $noAsignados = Actividad::getResultadosNoAsignadosPorPrograma($idPrograma, $idProyecto);
+            $faltantes = count($noAsignados);
+            if ($faltantes > 0) {
+                $msg .= " ⚠️ ATENCIÓN: Faltan $faltantes resultados de aprendizaje por asignar manualmente.";
+            }
+            if (!empty($stats['ra_not_found'])) {
+                $msg .= " (" . count($stats['ra_not_found']) . " RA del PDF no estaban en el Excel).";
+            }
+
             $this->json(['success' => true, 'message' => $msg, 'ruta' => '/public/uploads/' . $fileName, 'stats' => $stats]);
             
         } catch (\Exception $e) {

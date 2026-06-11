@@ -34,8 +34,10 @@ $router->get('/programa/ficha',     'App\Controllers\ProgramaController',  'fich
 $router->get('/chat',               'App\Controllers\AIController',        'index');
 
 // API routes — Dashboard
+$router->get('/api/dashboard/fichasActivas', 'App\Controllers\DashboardController', 'fichasActivas');
 $router->get('/api/dashboard/stats',    'App\Controllers\DashboardController', 'stats');
 $router->get('/api/dashboard/filtrar',  'App\Controllers\DashboardController', 'filtrar');
+$router->get('/api/dashboard/deudasAprendiz', 'App\Controllers\DashboardController', 'deudasAprendiz');
 $router->get('/api/dashboard/fases-stats', 'App\Controllers\DashboardController', 'fasesStats');
 $router->get('/api/dashboard/fase-detalle', 'App\Controllers\DashboardController', 'faseDetalle');
 

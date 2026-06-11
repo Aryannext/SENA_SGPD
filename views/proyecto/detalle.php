@@ -81,7 +81,7 @@
                     <div class="ra-item">
                         <i class="fas fa-check-circle" style="color:var(--accent);font-size:10px;"></i>
                         <code><?= htmlspecialchars($res['cod_resultado'] ?? '') ?></code>
-                        — <?= htmlspecialchars(mb_substr($res['nombre_resultado'] ?? '', 0, 90)) ?>
+                        — <span title="<?= htmlspecialchars($res['nombre_resultado'] ?? '') ?>"><?= htmlspecialchars($res['nombre_resultado'] ?? '') ?></span>
                     </div>
                     <?php endforeach; ?>
                 <?php else: ?>

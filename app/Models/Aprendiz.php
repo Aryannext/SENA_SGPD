@@ -43,8 +43,11 @@ class Aprendiz extends Model
         int $idFicha
     ): int {
         static::execute(
-            'INSERT IGNORE INTO aprendiz (ti_documento, nu_documento, nombre, apellido, estado, id_ficha)
-             VALUES (?, ?, ?, ?, ?, ?)',
+            'INSERT INTO aprendiz (ti_documento, nu_documento, nombre, apellido, estado, id_ficha)
+             VALUES (?, ?, ?, ?, ?, ?)
+             ON DUPLICATE KEY UPDATE 
+                estado = IF(VALUES(estado) != "", VALUES(estado), estado),
+                id_ficha = IF(VALUES(id_ficha) > 0, VALUES(id_ficha), id_ficha)',
             [$tiDoc, $nuDoc, $nombre, $apellido, $estado, $idFicha]
         );
         $row = static::findByDocumento($nuDoc);

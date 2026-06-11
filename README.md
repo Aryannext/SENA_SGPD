@@ -60,6 +60,7 @@ Para que SENA-IA pueda "hablar", necesitas correr el microservicio en Python.
 2. (Opcional pero recomendado) Crea y activa un entorno virtual:
 ```bash
 python3 -m venv venv
+
 source venv/bin/activate  # En Linux/Mac
 # venv\Scripts\activate   # En Windows
 ```

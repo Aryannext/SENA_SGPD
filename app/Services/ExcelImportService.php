@@ -104,7 +104,7 @@ final class ExcelImportService
             if (stripos($val, 'Estado') !== false) $colMap['estado'] = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
             if (stripos($val, 'Competencia') !== false) $colMap['compRaw'] = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
             if (stripos($val, 'Resultado') !== false) $colMap['resRaw'] = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
-            if (stripos($val, 'Juicio') !== false) $colMap['juicio'] = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
+            if (stripos($val, 'Juicio') !== false && stripos($val, 'Fecha') === false && stripos($val, 'Funcionario') === false) $colMap['juicio'] = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
             if (stripos($val, 'Fecha') !== false && stripos($val, 'Juicio') !== false) $colMap['fechaJuicio'] = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
             if (stripos($val, 'Funcionario') !== false) $colMap['funcRaw'] = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
         }
@@ -262,8 +262,8 @@ final class ExcelImportService
     {
         $juicio = mb_strtoupper(trim($juicio));
         return match (true) {
-            str_contains($juicio, 'APROB')  => 'APROBADO',
-            str_contains($juicio, 'NO APR') => 'NO APROBADO',
+            $juicio === 'A' || str_contains($juicio, 'APROB')  => 'APROBADO',
+            $juicio === 'D' || str_contains($juicio, 'NO APR') => 'NO APROBADO',
             default                          => 'POR EVALUAR',
         };
     }

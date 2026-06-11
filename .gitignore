@@ -1,0 +1,4 @@
+public/uploads/
+*.txt
+*.json
+test_*.php

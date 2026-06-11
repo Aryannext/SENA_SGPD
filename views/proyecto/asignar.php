@@ -82,9 +82,8 @@
                              onmouseover="this.style.borderColor='var(--accent)'"
                              onmouseout="this.style.borderColor='var(--border)'"
                              onclick="assignToActividad(<?= $act['id_actividad'] ?>)">
-                            <div style="font-size:12px;font-weight:600;color:var(--text-primary);">
-                                <i class="fas fa-cogs" style="color:var(--info);font-size:10px;"></i>
-                                <?= htmlspecialchars(substr($act['nombre_actividad'], 0, 60)) ?>
+                            <div style="font-size:12px;font-weight:600;color:var(--text-primary);line-height:1.4;" title="<?= htmlspecialchars($act['nombre_actividad']) ?>">
+                                <i class="fas fa-cogs" style="color:var(--info);font-size:10px;margin-right:4px;"></i><?= htmlspecialchars($act['nombre_actividad']) ?>
                             </div>
                         </div>
                         <?php endforeach; ?>
