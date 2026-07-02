@@ -71,7 +71,7 @@ CREATE TABLE aprendiz (
   nu_documento VARCHAR(20) UNIQUE,
   nombre VARCHAR(100),
   apellido VARCHAR(100),
-  estado ENUM('EN FORMACION','RETIRADO','CANCELADO','EGRESADO'),
+  estado VARCHAR(50) DEFAULT NULL,
   id_ficha INT,
   FOREIGN KEY (id_ficha) REFERENCES ficha(id_ficha) ON DELETE CASCADE
 ) ENGINE=InnoDB;
