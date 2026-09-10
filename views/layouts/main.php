@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="SGPD SENA — Sistema de Gestión de Progreso y Desempeño Académico">
     <meta name="robots" content="noindex, nofollow">
+    <meta name="base-path" content="<?= htmlspecialchars(\Core\App::basePath(), ENT_QUOTES, 'UTF-8') ?>">
     <meta name="csrf-token" content="<?= htmlspecialchars(\Core\Auth::tokenCsrf(), ENT_QUOTES, 'UTF-8') ?>">
     <title>SGPD SENA — <?= htmlspecialchars($pageTitle ?? 'Dashboard', ENT_QUOTES, 'UTF-8') ?></title>
 
@@ -12,10 +13,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <!-- Design System -->
-    <link rel="stylesheet" href="/SENA_SGPD/public/css/main.css">
+    <link rel="stylesheet" href="<?= \Core\App::url('/public/css/main.css') ?>">
     <?php if (!empty($extraCss)): ?>
         <?php foreach ((array) $extraCss as $css): ?>
-            <link rel="stylesheet" href="/SENA_SGPD/public/css/<?= $css ?>">
+            <link rel="stylesheet" href="<?= \Core\App::url('/public/css/') . $css ?>">
         <?php endforeach; ?>
     <?php endif; ?>
 
@@ -60,10 +61,10 @@
     <?php endif; ?>
 
     <!-- Core JS -->
-    <script src="/SENA_SGPD/public/js/app.js"></script>
+    <script src="<?= \Core\App::url('/public/js/app.js') ?>"></script>
     <?php if (!empty($extraJs)): ?>
         <?php foreach ((array) $extraJs as $js): ?>
-            <script src="/SENA_SGPD/public/js/<?= $js ?>"></script>
+            <script src="<?= \Core\App::url('/public/js/') . $js ?>"></script>
         <?php endforeach; ?>
     <?php endif; ?>
 </body>

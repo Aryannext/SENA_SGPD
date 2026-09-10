@@ -2,12 +2,24 @@
 
 declare(strict_types=1);
 
+use Core\Env;
+
+/**
+ * Conexión a la base de datos.
+ *
+ * Los valores llegan por entorno: en Docker los inyecta Dokploy y en local los
+ * toma del archivo `.env`. Los valores por defecto corresponden a una
+ * instalación de XAMPP recién hecha, para que el proyecto siga arrancando sin
+ * configurar nada mientras se desarrolla.
+ *
+ * Nunca escribas credenciales reales en este archivo: está versionado.
+ */
 return [
-    'host'     => '127.0.0.1',
-    'port'     => 3306,
-    'dbname'   => 'sistema_sena',
-    'username' => 'root',
-    'password' => '',
+    'host'     => Env::get('DB_HOST', '127.0.0.1'),
+    'port'     => Env::int('DB_PORT', 3306),
+    'dbname'   => Env::get('DB_NAME', 'sistema_sena'),
+    'username' => Env::get('DB_USER', 'root'),
+    'password' => Env::get('DB_PASSWORD', ''),
     'charset'  => 'utf8mb4',
     'options'  => [
         PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,

@@ -14,6 +14,10 @@ declare(strict_types=1);
 
 $router = new Core\Router();
 
+// Comprobacion de salud para Docker y Dokploy: publica a proposito, no expone
+// ningun dato del sistema.
+$router->get('/salud', 'App\Controllers\SaludController', 'index', publica: true);
+
 // Acceso al sistema — las únicas rutas públicas.
 $router->get('/login',              'App\Controllers\AuthController', 'login',     publica: true);
 $router->post('/login',             'App\Controllers\AuthController', 'loginPost', publica: true);
@@ -33,6 +37,10 @@ $router->get('/programa',           'App\Controllers\ProgramaController',  'inde
 $router->get('/programa/detalle',   'App\Controllers\ProgramaController',  'detalle');
 $router->get('/programa/ficha',     'App\Controllers\ProgramaController',  'ficha');
 $router->get('/chat',               'App\Controllers\AIController',        'index');
+
+// Archivos guardados fuera de la raiz web (V-04): se entregan solo con sesion.
+$router->get('/archivo/proyecto/{id}',  'App\Controllers\ArchivoController', 'proyecto');
+$router->get('/archivo/audio/{nombre}', 'App\Controllers\ArchivoController', 'audio');
 
 // API routes — Dashboard
 $router->get('/api/dashboard/fichasActivas', 'App\Controllers\DashboardController', 'fichasActivas');

@@ -90,4 +90,4 @@ try {
 }
 
 echo "\nUsuario «{$usuario}» creado con rol {$rol} (id {$id}).\n";
-echo "Ya puedes iniciar sesión en /SENA_SGPD/login\n";
+echo 'Ya puedes iniciar sesion en ' . Core\App::url('/login') . "\n";

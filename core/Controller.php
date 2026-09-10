@@ -62,7 +62,7 @@ abstract class Controller
      */
     protected function redirect(string $uri): void
     {
-        header('Location: ' . \Core\Router::BASE_PATH . $uri);
+        header('Location: ' . App::url($uri));
         exit;
     }
 

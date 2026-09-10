@@ -12,12 +12,6 @@ namespace Core;
  */
 final class Router
 {
-    /**
-     * Subdirectorio en el que vive la aplicacion.
-     * En la raiz de un dominio debe quedar como cadena vacia.
-     */
-    public const BASE_PATH = '/SENA_SGPD';
-
     /** @var array<string, array{controller: string, action: string, pattern: string}> */
     private array $routes = [];
 
@@ -75,8 +69,8 @@ final class Router
         $uri = parse_url($uri, PHP_URL_PATH) ?: '/';
         $uri = rtrim($uri, '/') ?: '/';
 
-        // Remove base path (e.g., /SENA_SGPD)
-        $basePath = self::BASE_PATH;
+        // Quita el subdirectorio en el que vive la aplicacion (APP_BASE_PATH)
+        $basePath = App::basePath();
         if (str_starts_with($uri, $basePath)) {
             $uri = substr($uri, strlen($basePath)) ?: '/';
         }

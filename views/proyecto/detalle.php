@@ -1,6 +1,6 @@
 <div class="page-header animate-in" style="margin-bottom:28px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
-        <a href="/SENA_SGPD/proyecto" class="btn btn-secondary btn-sm" style="border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;padding:0;">
+        <a href="<?= \Core\App::url('/proyecto') ?>" class="btn btn-secondary btn-sm" style="border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;padding:0;">
             <i class="fas fa-arrow-left"></i>
         </a>
         <div>
@@ -31,7 +31,7 @@
 <div class="card animate-in" style="margin-bottom:20px;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
     <div style="display:flex;align-items:center;gap:16px;">
         <?php if (!empty($proyecto['ruta_pdf'])): ?>
-        <a href="/SENA_SGPD<?= htmlspecialchars($proyecto['ruta_pdf']) ?>" target="_blank" class="btn btn-secondary btn-sm">
+        <a href="<?= \Core\App::url('/archivo/proyecto/') . (int) $proyecto['id_proyecto'] ?>" target="_blank" class="btn btn-secondary btn-sm">
             <i class="fas fa-file-pdf" style="color:var(--danger);"></i> Ver PDF Actual
         </a>
         <?php endif; ?>
@@ -40,7 +40,7 @@
         </button>
         <input type="file" id="pdf-upload" accept=".pdf" style="display:none;" onchange="uploadPdf(this)">
     </div>
-    <a href="/SENA_SGPD/proyecto/asignar?id=<?= $proyecto['id_proyecto'] ?>" class="btn btn-secondary btn-sm">
+    <a href="<?= \Core\App::url('/proyecto/asignar?id=') . $proyecto['id_proyecto'] ?>" class="btn btn-secondary btn-sm">
         <i class="fas fa-link"></i> Asignar Resultados a Fases
     </a>
 </div>

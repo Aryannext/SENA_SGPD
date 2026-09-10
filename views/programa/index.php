@@ -14,7 +14,7 @@
 <?php else: ?>
 <div class="programs-grid">
     <?php foreach ($programas as $p): ?>
-    <div class="program-card animate-in" onclick="window.location.href='/SENA_SGPD/programa/detalle?id=<?= $p['id_programa'] ?>'">
+    <div class="program-card animate-in" onclick="window.location.href='<?= \Core\App::url('/programa/detalle?id=') . $p['id_programa'] ?>'">
         <!-- Gradient top bar -->
         <div class="program-card-gradient <?= strtolower(str_replace(' ', '-', $p['modalidad'] ?? 'presencial')) ?>"></div>
 

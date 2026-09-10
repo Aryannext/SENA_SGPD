@@ -7,3 +7,9 @@ RewriteRule ^ - [L]
 
 # Route everything else through the front controller
 RewriteRule ^(.*)$ index.php [QSA,L]
+
+# Defensa en profundidad: aunque el codigo ya no guarda nada sensible bajo la
+# raiz web, se niega el acceso directo a lo que nunca debe servirse tal cual.
+RedirectMatch 404 ^/(.*/)?(storage|app|core|config|tests|tools|docs|vendor|tts_server)/
+RedirectMatch 404 ^/(.*/)?\.(env|git)
+RedirectMatch 404 ^/(.*/)?(composer\.(json|lock)|Dockerfile|docker-compose\.yml)$

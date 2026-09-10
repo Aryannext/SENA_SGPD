@@ -23,9 +23,7 @@ final class TTSService
         $this->cacheDir   = $config['cache_dir'];
         $this->maxTextLen = $config['max_text_len'];
 
-        if (!is_dir($this->cacheDir)) {
-            mkdir($this->cacheDir, 0755, true);
-        }
+        // El directorio lo crea App::audioPath() al resolver la configuracion.
     }
 
     /**
@@ -46,7 +44,7 @@ final class TTSService
         $filePath = $this->cacheDir . $filename;
 
         if (file_exists($filePath)) {
-            return '/SENA_SGPD/public/audio/' . $filename;
+            return \Core\App::url('/archivo/audio/' . $filename);
         }
 
         // Call TTS server
@@ -71,7 +69,7 @@ final class TTSService
         // Check if response is audio
         if (str_contains($contentType ?? '', 'audio') || strlen($response) > 1000) {
             file_put_contents($filePath, $response);
-            return '/SENA_SGPD/public/audio/' . $filename;
+            return \Core\App::url('/archivo/audio/' . $filename);
         }
 
         return null;

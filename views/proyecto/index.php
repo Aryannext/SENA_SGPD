@@ -27,7 +27,7 @@
 <?php else: ?>
 <div class="projects-grid">
     <?php foreach ($proyectos as $p): ?>
-    <div class="project-card animate-in" onclick="window.location.href='/SENA_SGPD/proyecto/detalle?id=<?= $p['id_proyecto'] ?>'">
+    <div class="project-card animate-in" onclick="window.location.href='<?= \Core\App::url('/proyecto/detalle?id=') . $p['id_proyecto'] ?>'">
         <div class="project-card-header">
             <div class="project-icon">
                 <i class="fas fa-book-open"></i>
@@ -233,7 +233,7 @@ async function uploadAutomatic(input) {
     formData.append('pdf', file);
 
     try {
-        const response = await fetch('/SENA_SGPD/api/proyecto/upload-pdf', {
+        const response = await fetch(APP.basePath + '/api/proyecto/upload-pdf', {
             method: 'POST',
             body: formData
         });

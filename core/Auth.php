@@ -178,7 +178,7 @@ final class Auth
             $_SESSION[self::CLAVE_DESTINO] = $destino;
         }
 
-        header('Location: ' . Router::BASE_PATH . '/login');
+        header('Location: ' . App::url('/login'));
         exit;
     }
 
@@ -196,8 +196,9 @@ final class Auth
         }
 
         $ruta = parse_url($uri, PHP_URL_PATH) ?: '';
-        if (str_starts_with($ruta, Router::BASE_PATH)) {
-            $ruta = substr($ruta, strlen(Router::BASE_PATH)) ?: '/';
+        $base = App::basePath();
+        if ($base !== '' && str_starts_with($ruta, $base)) {
+            $ruta = substr($ruta, strlen($base)) ?: '/';
         }
 
         if ($ruta === '' || !str_starts_with($ruta, '/') || str_starts_with($ruta, '//')) {

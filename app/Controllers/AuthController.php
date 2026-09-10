@@ -51,7 +51,7 @@ final class AuthController extends Controller
     public function logout(): void
     {
         Auth::salir();
-        header('Location: ' . \Core\Router::BASE_PATH . '/login');
+        header('Location: ' . \Core\App::url('/login'));
         exit;
     }
 }

@@ -107,7 +107,7 @@
             </div>
         <?php endif; ?>
 
-        <form method="POST" action="/SENA_SGPD/login" autocomplete="off">
+        <form method="POST" action="<?= \Core\App::url('/login') ?>" autocomplete="off">
             <input type="hidden" name="_csrf" value="<?= htmlspecialchars(\Core\Auth::tokenCsrf(), ENT_QUOTES, 'UTF-8') ?>">
 
             <div class="form-group">

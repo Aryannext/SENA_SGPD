@@ -1,6 +1,6 @@
 <div class="page-header animate-in" style="margin-bottom:20px;">
     <div style="display:flex;align-items:center;gap:12px;">
-        <a href="/SENA_SGPD/programa/detalle?id=<?= $programa['id_programa'] ?? 0 ?>" class="btn btn-secondary btn-sm" style="border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;padding:0;">
+        <a href="<?= \Core\App::url('/programa/detalle?id=') . ($programa['id_programa'] ?? 0) ?>" class="btn btn-secondary btn-sm" style="border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;padding:0;">
             <i class="fas fa-arrow-left"></i>
         </a>
         <div>
@@ -251,7 +251,7 @@ async function loadAprendices() {
     });
 
     try {
-        const basePath = (typeof APP !== 'undefined') ? APP.basePath : '/SENA_SGPD';
+        const basePath = (typeof APP !== 'undefined') ? APP.basePath : '<?= \Core\App::basePath() ?>';
         const res = await fetch(basePath + '/api/programa/aprendices?' + params.toString());
         const data = await res.json();
 
@@ -300,7 +300,7 @@ async function loadAprendices() {
                 </td>
                 <td style="font-weight:600;color:var(--accent);">${a.aprobados ?? 0}</td>
                 <td style="font-weight:600;color:var(--warning);">${a.por_evaluar ?? 0}</td>
-                <td><a href="/SENA_SGPD/aprendiz/${a.id_aprendiz}" class="btn btn-sm btn-secondary"><i class="fas fa-eye"></i></a></td>
+                <td><a href="${basePath}/aprendiz/${a.id_aprendiz}" class="btn btn-sm btn-secondary"><i class="fas fa-eye"></i></a></td>
             </tr>`;
         }).join('');
 

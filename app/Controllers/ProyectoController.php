@@ -48,13 +48,13 @@ final class ProyectoController extends Controller
     {
         $id = (int) ($_GET['id'] ?? 0);
         if ($id <= 0) {
-            header('Location: /SENA_SGPD/proyecto');
+            header('Location: ' . \Core\App::url('/proyecto'));
             exit;
         }
 
         $proyecto = ProyectoFormativo::findByIdWithPrograma($id);
         if (!$proyecto) {
-            header('Location: /SENA_SGPD/proyecto');
+            header('Location: ' . \Core\App::url('/proyecto'));
             exit;
         }
 
@@ -80,13 +80,13 @@ final class ProyectoController extends Controller
     {
         $idProyecto = (int) ($_GET['id'] ?? 0);
         if ($idProyecto <= 0) {
-            header('Location: /SENA_SGPD/proyecto');
+            header('Location: ' . \Core\App::url('/proyecto'));
             exit;
         }
 
         $proyecto = ProyectoFormativo::findByIdWithPrograma($idProyecto);
         if (!$proyecto) {
-            header('Location: /SENA_SGPD/proyecto');
+            header('Location: ' . \Core\App::url('/proyecto'));
             exit;
         }
 
@@ -226,31 +226,18 @@ final class ProyectoController extends Controller
 
     public function uploadPdf(): void
     {
-        if (!isset($_FILES['pdf']) || $_FILES['pdf']['error'] !== UPLOAD_ERR_OK) {
-            $this->json(['success' => false, 'message' => 'Error al subir el archivo.'], 400);
+        try {
+            $destination = (new \App\Services\CargaArchivoService())->recibir(
+                $_FILES['pdf'] ?? [],
+                ['pdf'],
+                'proyecto'
+            );
+        } catch (\RuntimeException $e) {
+            $this->json(['success' => false, 'message' => $e->getMessage()], 400);
             return;
         }
 
-        $file = $_FILES['pdf'];
-        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-        
-        if ($ext !== 'pdf') {
-            $this->json(['success' => false, 'message' => 'Solo se permiten archivos PDF.'], 400);
-            return;
-        }
-
-        $uploadDir = dirname(__DIR__, 2) . '/public/uploads/';
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
-        }
-
-        $fileName = 'proyecto_auto_' . time() . '.pdf';
-        $destination = $uploadDir . $fileName;
-
-        if (!move_uploaded_file($file['tmp_name'], $destination)) {
-            $this->json(['success' => false, 'message' => 'Error al guardar el archivo.'], 500);
-            return;
-        }
+        $fileName = basename($destination);
 
         // Parse PDF to extract metadata automatically
         try {
@@ -347,7 +334,9 @@ final class ProyectoController extends Controller
                 Ficha::linkToProjectByProgram($idProyecto, $idPrograma);
             }
 
-            ProyectoFormativo::updatePdf($idProyecto, '/public/uploads/' . $fileName);
+            // Se guarda solo el nombre: el archivo vive fuera de la raiz web y
+            // se entrega por ArchivoController, que exige sesion (V-04).
+            ProyectoFormativo::updatePdf($idProyecto, $fileName);
 
             // Parse activities and RAs using the service
             $parserService = new \App\Services\ProjectPdfParserService($idProyecto);
@@ -364,11 +353,11 @@ final class ProyectoController extends Controller
                 $msg .= " (" . count($stats['ra_not_found']) . " RA del PDF no estaban en el Excel).";
             }
 
-            $this->json(['success' => true, 'message' => $msg, 'ruta' => '/public/uploads/' . $fileName, 'stats' => $stats]);
+            $this->json(['success' => true, 'message' => $msg, 'stats' => $stats]);
             
         } catch (\Exception $e) {
             unlink($destination);
-            $this->json(['success' => false, 'message' => 'Error al procesar el PDF: ' . $e->getMessage()], 500);
+            $this->json(['success' => false, 'message' => 'No se pudo procesar el PDF. Verifica que sea el Proyecto Formativo del SENA original.'], 500);
         }
     }
 

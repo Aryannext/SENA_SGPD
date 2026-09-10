@@ -9,7 +9,7 @@ const Desercion = {
 
     async fetchStats() {
         try {
-            const res = await fetch('/SENA_SGPD/api/desercion/stats');
+            const res = await fetch(APP.basePath + '/api/desercion/stats');
             const data = await res.json();
             
             this.renderMotivosChart(data.motivos);
@@ -25,7 +25,7 @@ const Desercion = {
 
     async fetchPrediccion() {
         try {
-            const res = await fetch('/SENA_SGPD/api/desercion/predecir');
+            const res = await fetch(APP.basePath + '/api/desercion/predecir');
             const data = await res.json();
             
             const aiText = document.getElementById('ai-prediction');

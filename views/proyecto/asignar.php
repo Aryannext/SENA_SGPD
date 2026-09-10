@@ -1,6 +1,6 @@
 <div class="page-header animate-in" style="margin-bottom:28px;">
     <div style="display:flex;align-items:center;gap:16px;">
-        <a href="/SENA_SGPD/proyecto/detalle?id=<?= $proyecto['id_proyecto'] ?? '' ?>"
+        <a href="<?= \Core\App::url('/proyecto/detalle?id=') . ($proyecto['id_proyecto'] ?? '') ?>"
            style="color:var(--text-muted);text-decoration:none;font-size:18px;"
            title="Volver al proyecto">
             <i class="fas fa-arrow-left"></i>

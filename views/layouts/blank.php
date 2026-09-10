@@ -7,7 +7,7 @@
     <title>SGPD SENA — <?= htmlspecialchars($pageTitle ?? 'Acceso', ENT_QUOTES, 'UTF-8') ?></title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="/SENA_SGPD/public/css/main.css">
+    <link rel="stylesheet" href="<?= \Core\App::url('/public/css/main.css') ?>">
 </head>
 <body>
     <?= $content ?? '' ?>

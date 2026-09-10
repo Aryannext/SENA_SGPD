@@ -33,8 +33,15 @@ final class AutenticacionTest extends TestCase
         return null;
     }
 
-    /** Solo el acceso al sistema puede ser público. */
-    public function testSoloLasRutasDeAccesoSonPublicas(): void
+    /**
+     * Solo pueden ser públicas el acceso al sistema y la comprobación de salud.
+     *
+     * La de salud existe porque Docker y Dokploy necesitan preguntar si el
+     * servicio está en pie antes de enrutar tráfico hacia él, y no puede exigir
+     * sesión. A cambio no revela nada: ni versiones, ni rutas, ni el motivo de
+     * un fallo de base de datos.
+     */
+    public function testSoloLasRutasDeAccesoYSaludSonPublicas(): void
     {
         $publicas = [];
         foreach ($this->router->getRoutes() as $ruta) {
@@ -45,7 +52,7 @@ final class AutenticacionTest extends TestCase
 
         sort($publicas);
         $this->assertSame(
-            ['GET /login', 'POST /login'],
+            ['GET /login', 'GET /salud', 'POST /login'],
             $publicas,
             'ninguna otra ruta debe quedar accesible sin iniciar sesión'
         );
@@ -156,9 +163,13 @@ final class AutenticacionTest extends TestCase
         $normalizar = new \ReflectionMethod(Auth::class, 'normalizarDestino');
         $normalizar->setAccessible(true);
 
+        // La entrada llega tal cual la pide el navegador: con la ruta base que
+        // esté configurada, sea cual sea.
+        $base = \Core\App::basePath();
+
         $this->assertSame(
             '/programa/ficha?id=1',
-            $normalizar->invoke(null, '/SENA_SGPD/programa/ficha?id=1'),
+            $normalizar->invoke(null, $base . '/programa/ficha?id=1'),
             'la ruta base no debe quedar duplicada'
         );
         $this->assertSame(
@@ -166,22 +177,56 @@ final class AutenticacionTest extends TestCase
             $normalizar->invoke(null, '/dashboard'),
             'una ruta ya normalizada se conserva'
         );
-        $this->assertSame(null, $normalizar->invoke(null, '/SENA_SGPD/logout'), 'volver a /logout cerraría la sesión');
-        $this->assertSame(null, $normalizar->invoke(null, '/SENA_SGPD/login'), 'volver a /login sería un bucle');
+        $this->assertSame(null, $normalizar->invoke(null, $base . '/logout'), 'volver a /logout cerraría la sesión');
+        $this->assertSame(null, $normalizar->invoke(null, $base . '/login'), 'volver a /login sería un bucle');
         $this->assertSame(null, $normalizar->invoke(null, ''), 'sin URI no hay destino');
     }
 
-    /** La ruta base vive en un solo sitio y todos la leen de allí. */
-    public function testLaRutaBaseEstaCentralizada(): void
+    /**
+     * La ruta base sale de la configuración, no está escrita en el código.
+     *
+     * Estaba incrustada en 45 sitios de 22 archivos, y el documento de
+     * despliegue pedía editarlos uno a uno para publicar en producción
+     * (RNF-22). Ahora sale de `APP_BASE_PATH`, que es lo que permite desplegar
+     * la misma imagen en un subdominio y en un subdirectorio.
+     */
+    public function testLaRutaBaseSaleDeLaConfiguracion(): void
     {
-        $this->assertSame('/SENA_SGPD', \Core\Router::BASE_PATH);
+        $base = \Core\App::basePath();
 
-        foreach (['core/Controller.php', 'core/Auth.php', 'app/Controllers/AuthController.php'] as $archivo) {
-            $codigo = file_get_contents(RAIZ . '/' . $archivo) ?: '';
+        $this->assertTrue(
+            $base === '' || str_starts_with($base, '/'),
+            'la ruta base debe estar vacía o empezar por barra'
+        );
+        $this->assertFalse(str_ends_with($base, '/'), 'no debe llevar barra final');
+
+        $this->assertSame($base . '/dashboard', \Core\App::url('/dashboard'));
+        $this->assertSame($base . '/dashboard', \Core\App::url('dashboard'), 'la barra inicial es opcional');
+        $this->assertSame($base, \Core\App::url(''), 'sin ruta devuelve solo la base');
+    }
+
+    /** Ningún archivo del proyecto puede llevar la ruta base escrita a mano. */
+    public function testNingunArchivoIncrustaLaRutaBase(): void
+    {
+        $archivos = array_merge(
+            glob(RAIZ . '/core/*.php') ?: [],
+            glob(RAIZ . '/app/Controllers/*.php') ?: [],
+            glob(RAIZ . '/app/Services/*.php') ?: [],
+            glob(RAIZ . '/views/*/*.php') ?: [],
+            glob(RAIZ . '/public/js/*.js') ?: []
+        );
+        $this->assertTrue($archivos !== [], 'no se encontraron archivos que revisar');
+
+        foreach ($archivos as $archivo) {
+            $codigo = file_get_contents($archivo) ?: '';
+
+            // Se ignoran los comentarios, que sí pueden citarla como ejemplo.
+            $codigo = preg_replace('#(/\*.*?\*/|//[^\n]*|\*[^\n]*)#s', '', $codigo) ?? $codigo;
+
             $this->assertStringNotContainsString(
-                "'/SENA_SGPD",
+                '/SENA_SGPD',
                 $codigo,
-                "{$archivo} debe usar Router::BASE_PATH y no la ruta escrita a mano"
+                basename($archivo) . ' incrusta la ruta base: debe usar App::url() o APP.basePath'
             );
         }
     }

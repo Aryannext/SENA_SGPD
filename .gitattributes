@@ -1,0 +1,20 @@
+# El repositorio se edita desde Windows pero se construye y se ejecuta en Linux.
+# Sin esto, un script con retornos de carro hace que el contenedor falle con un
+# «not found» incomprensible al arrancar.
+
+* text=auto eol=lf
+
+# Estos SIEMPRE con saltos de línea de Unix, pase lo que pase en local.
+*.sh            text eol=lf
+Dockerfile      text eol=lf
+docker-compose*.yml text eol=lf
+*.php           text eol=lf
+*.sql           text eol=lf
+
+# Binarios: git no debe tocarlos.
+*.xls   binary
+*.xlsx  binary
+*.pdf   binary
+*.wav   binary
+*.png   binary
+*.jpg   binary

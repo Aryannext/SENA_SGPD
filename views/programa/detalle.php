@@ -1,6 +1,6 @@
 <div class="page-header animate-in" style="margin-bottom:28px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
-        <a href="/SENA_SGPD/programa" class="btn btn-secondary btn-sm" style="border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;padding:0;">
+        <a href="<?= \Core\App::url('/programa') ?>" class="btn btn-secondary btn-sm" style="border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;padding:0;">
             <i class="fas fa-arrow-left"></i>
         </a>
         <div>
@@ -20,7 +20,7 @@
                     <i class="fas fa-users"></i> <?= (int) $programa['total_aprendices'] ?> aprendices total
                 </span>
                 <?php if ($idProyecto): ?>
-                    <a href="/SENA_SGPD/proyecto/detalle?id=<?= $idProyecto ?>" class="badge badge-success" style="text-decoration:none; display:inline-flex; align-items:center; gap:5px; margin-left:10px; cursor:pointer;">
+                    <a href="<?= \Core\App::url('/proyecto/detalle?id=') . $idProyecto ?>" class="badge badge-success" style="text-decoration:none; display:inline-flex; align-items:center; gap:5px; margin-left:10px; cursor:pointer;">
                         <i class="fas fa-check-circle"></i> Proyecto Formativo Activo (Ver)
                     </a>
                 <?php else: ?>
@@ -78,7 +78,7 @@
 <?php else: ?>
 <div class="fichas-grid">
     <?php foreach ($fichas as $f): ?>
-    <div class="ficha-card animate-in" onclick="window.location.href='/SENA_SGPD/programa/ficha?id=<?= $f['id_ficha'] ?>'">
+    <div class="ficha-card animate-in" onclick="window.location.href='<?= \Core\App::url('/programa/ficha?id=') . $f['id_ficha'] ?>'">
         <div class="ficha-card-header">
             <div class="ficha-number">
                 <i class="fas fa-id-card"></i>

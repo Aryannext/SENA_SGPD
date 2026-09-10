@@ -1,0 +1,72 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# SGPD SENA — despliegue con Docker Compose
+#
+# Sirve para dos cosas:
+#   · Probar la imagen en tu equipo antes de subir nada:  docker compose up -d
+#   · Desplegar en Dokploy con el tipo «Docker Compose», si prefieres que la
+#     base de datos viva junto a la aplicación en lugar de crearla como servicio
+#     aparte del panel.
+#
+# En Dokploy, Traefik se encarga del dominio y del certificado: no publiques el
+# puerto 80 al exterior desde aquí, asígnale el dominio desde el panel.
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Vacío: la aplicación ocupa la raíz del dominio.
+      APP_BASE_PATH: ""
+      APP_STORAGE_PATH: /var/www/html/storage
+      APP_MAX_UPLOAD_MB: "20"
+      APP_DEBUG: "false"
+      APP_AUTO_MIGRATE: "true"
+
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_NAME: ${DB_NAME:-sistema_sena}
+      DB_USER: ${DB_USER:-sgpd}
+      DB_PASSWORD: ${DB_PASSWORD:?define DB_PASSWORD en el entorno}
+    volumes:
+      # Los archivos importados y el audio sobreviven a los despliegues.
+      - sgpd_storage:/var/www/html/storage
+    ports:
+      # Solo para pruebas locales. En Dokploy, quita esta sección y asigna el
+      # dominio desde el panel: Traefik enruta al contenedor por la red interna.
+      - "8080:80"
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1/salud') !== false ? 0 : 1);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-sistema_sena}
+      MYSQL_USER: ${DB_USER:-sgpd}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?define DB_PASSWORD en el entorno}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?define DB_ROOT_PASSWORD en el entorno}
+    volumes:
+      - sgpd_db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  sgpd_storage:
+  sgpd_db:

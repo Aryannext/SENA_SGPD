@@ -1,0 +1,27 @@
+# Control de versiones e historial
+.git
+.gitignore
+
+# Nunca deben entrar a la imagen
+.env
+storage/
+DATOS_REALES_NO_VERSIONAR/
+
+# Dependencias: las instala la etapa de construccion
+vendor/
+
+# No aportan nada en produccion
+tests/
+tts_server/
+docs/*.pdf
+docs/*.xls
+public/uploads/
+public/audio/
+
+# Artefactos locales
+*.log
+*.bundle
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/

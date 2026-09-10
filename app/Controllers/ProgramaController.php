@@ -32,13 +32,13 @@ final class ProgramaController extends Controller
     {
         $id = (int) ($_GET['id'] ?? 0);
         if ($id <= 0) {
-            header('Location: /SENA_SGPD/programa');
+            header('Location: ' . \Core\App::url('/programa'));
             exit;
         }
 
         $programa = Programa::findByIdWithStats($id);
         if (!$programa) {
-            header('Location: /SENA_SGPD/programa');
+            header('Location: ' . \Core\App::url('/programa'));
             exit;
         }
 
@@ -74,13 +74,13 @@ final class ProgramaController extends Controller
     {
         $id = (int) ($_GET['id'] ?? 0);
         if ($id <= 0) {
-            header('Location: /SENA_SGPD/programa');
+            header('Location: ' . \Core\App::url('/programa'));
             exit;
         }
 
         $ficha = Ficha::findById($id);
         if (!$ficha) {
-            header('Location: /SENA_SGPD/programa');
+            header('Location: ' . \Core\App::url('/programa'));
             exit;
         }
 

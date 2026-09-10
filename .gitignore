@@ -39,3 +39,10 @@ Desktop.ini
 .idea/
 .vscode/
 *.swp
+
+# Variables de entorno con credenciales reales
+.env
+
+# Almacenamiento en tiempo de ejecucion (volumen en Docker)
+/storage/*
+!/storage/.gitkeep

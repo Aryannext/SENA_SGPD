@@ -13,7 +13,7 @@
         <button class="chat-panel-close" onclick="toggleChatWidget()"><i class="fas fa-times"></i></button>
     </div>
     <!-- Iframe loads lazily to avoid blocking page load with ping timeouts -->
-    <iframe data-src="/SENA_SGPD/chat?widget=true" id="chat-iframe" frameborder="0" allow="microphone"></iframe>
+    <iframe data-src="<?= \Core\App::url('/chat?widget=true') ?>" id="chat-iframe" frameborder="0" allow="microphone"></iframe>
 </div>
 
 <style>

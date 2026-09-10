@@ -24,7 +24,8 @@ Servicio Nacional de Aprendizaje — SENA Regional Caquetá
 | 13 | [Reglas de Negocio](13_REGLAS_NEGOCIO.md) | Restricciones del dominio y dónde se aplican (RN-01 … RN-25) |
 | 14 | [Historias de Usuario](14_HISTORIAS_USUARIO.md) | Necesidades por rol con criterios de aceptación (HU-01 … HU-19) |
 | 15 | [Matriz de Trazabilidad](15_MATRIZ_TRAZABILIDAD.md) | Enunciado → requisito → código → prueba |
-| 16 | [Plan de Pruebas](16_PLAN_PRUEBAS.md) | Casos de prueba derivados de los criterios (CP-01 … CP-53) |
+| 16 | [Plan de Pruebas](16_PLAN_PRUEBAS.md) | Casos de prueba derivados de los criterios (CP-01 … CP-59) |
+| 17 | [Despliegue con Dokploy y Docker](17_DESPLIEGUE_DOKPLOY.md) | Del repositorio de GitHub al contenedor en el VPS |
 
 ---
 

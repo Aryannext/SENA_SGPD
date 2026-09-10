@@ -4,7 +4,7 @@
  * Highlights the active route based on REQUEST_URI.
  */
 $currentUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
-$basePath   = '/SENA_SGPD';
+$basePath   = \Core\App::basePath();
 
 function isActive(string $path, string $currentUri, string $basePath): string {
     $full = $basePath . $path;

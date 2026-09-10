@@ -4,7 +4,11 @@
  */
 
 const APP = {
-    basePath: '/SENA_SGPD',
+    /**
+     * Subdirectorio en el que vive la aplicacion, publicado por el layout.
+     * Vacio cuando ocupa la raiz de un dominio, que es el caso en Docker.
+     */
+    basePath: document.querySelector('meta[name="base-path"]')?.content ?? '',
 
     /**
      * Token CSRF de la sesión, publicado por el layout.

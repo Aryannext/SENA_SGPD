@@ -41,7 +41,7 @@
                             <td><?= htmlspecialchars($a['apellido']) ?></td>
                             <td><span class="badge <?= $badgeClass ?>"><?= htmlspecialchars($a['estado']) ?></span></td>
                             <td><?= htmlspecialchars($a['nu_ficha'] ?? '-') ?></td>
-                            <td><a href="/SENA_SGPD/aprendiz/<?= $a['id_aprendiz'] ?>" class="btn btn-sm btn-secondary"><i class="fas fa-eye"></i> Ver</a></td>
+                            <td><a href="<?= \Core\App::url('/aprendiz/') . $a['id_aprendiz'] ?>" class="btn btn-sm btn-secondary"><i class="fas fa-eye"></i> Ver</a></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>
