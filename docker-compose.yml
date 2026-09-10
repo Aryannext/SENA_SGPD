@@ -37,9 +37,14 @@ services:
       # Los archivos importados y el audio sobreviven a los despliegues.
       - sgpd_storage:/var/www/html/storage
     ports:
-      # Solo para pruebas locales. En Dokploy, quita esta sección y asigna el
-      # dominio desde el panel: Traefik enruta al contenedor por la red interna.
-      - "8080:80"
+      # Solo para pruebas locales. Configurable porque el 8080 suele estar
+      # ocupado cuando hay varios proyectos en la misma máquina: define APP_PORT
+      # en tu .env si te choca.
+      #
+      # En Dokploy, quita esta sección y asigna el dominio desde el panel:
+      # Traefik enruta al contenedor por la red interna, y publicar el puerto lo
+      # dejaría expuesto además de poder chocar con tus otros proyectos.
+      - "${APP_PORT:-8080}:80"
     healthcheck:
       test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1/salud') !== false ? 0 : 1);"]
       interval: 30s

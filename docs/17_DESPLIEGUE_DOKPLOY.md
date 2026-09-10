@@ -13,6 +13,22 @@ configuración de Apache: la imagen ya la trae dentro.
 > **Antes de empezar.** Este documento asume que el VPS ya tiene Dokploy funcionando y
 > otros proyectos desplegados. Solo cubre lo específico del SGPD.
 
+### Verificado, no supuesto
+
+Todo lo que sigue se probó levantando la pila completa con Docker Compose:
+
+| | |
+|---|---|
+| Construcción de la imagen | **2 min 56 s** en un equipo de 16 núcleos |
+| Tamaño de la imagen | **734 MB** |
+| Arranque | espera la base, crea el esquema, aplica migraciones y queda `healthy` |
+| Redespliegue | los archivos y los datos **sobreviven**; las migraciones no se repiten |
+| `storage/` por URL | **404** — no es alcanzable |
+| `config/`, `vendor/`, `.env`, `docs/`, `tools/` por URL | **404** en los cinco |
+
+En un VPS compartido con menos núcleos la construcción tardará bastante más: cuenta
+con 8 a 15 minutos y no la lances mientras tus otros proyectos tengan carga.
+
 ---
 
 ## 17.2 Qué cambió para que esto fuera posible
@@ -161,11 +177,12 @@ copias de seguridad y sobre quién accede.
 ## 17.7 Probarlo en tu equipo antes de subir
 
 ```bash
-cp .env.example .env          # y ajusta DB_PASSWORD
+cp .env.example .env          # y ajusta DB_PASSWORD y DB_ROOT_PASSWORD
 docker compose up -d --build
 ```
 
-Queda en `http://localhost:8080`. Para crear el usuario:
+Queda en `http://localhost:8080`. Si ese puerto ya lo usa otro proyecto —pasa a
+menudo—, añade `APP_PORT=8099` a tu `.env` y usa ese. Para crear el usuario:
 
 ```bash
 docker compose exec app php tools/crear-usuario.php admin ADMIN
