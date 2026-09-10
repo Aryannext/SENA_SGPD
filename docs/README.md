@@ -19,6 +19,12 @@ Servicio Nacional de Aprendizaje — SENA Regional Caquetá
 | 08 | [Flujos de Proceso](08_FLUJOS_PROCESO.md) | Diagramas de secuencia de los procesos clave |
 | 09 | [Módulos Funcionales](09_MODULOS_FUNCIONALES.md) | Descripción detallada de cada módulo del sistema |
 | 10 | [Guía de Instalación y Despliegue](10_INSTALACION_DESPLIEGUE.md) | Requisitos, configuración local y hosting |
+| 11 | [Requisitos Funcionales](11_REQUISITOS_FUNCIONALES.md) | Qué debe hacer el sistema (RF-01 … RF-44) |
+| 12 | [Requisitos No Funcionales](12_REQUISITOS_NO_FUNCIONALES.md) | Rendimiento, seguridad, datos personales y operación (RNF-01 … RNF-30) |
+| 13 | [Reglas de Negocio](13_REGLAS_NEGOCIO.md) | Restricciones del dominio y dónde se aplican (RN-01 … RN-25) |
+| 14 | [Historias de Usuario](14_HISTORIAS_USUARIO.md) | Necesidades por rol con criterios de aceptación (HU-01 … HU-19) |
+| 15 | [Matriz de Trazabilidad](15_MATRIZ_TRAZABILIDAD.md) | Enunciado → requisito → código → prueba |
+| 16 | [Plan de Pruebas](16_PLAN_PRUEBAS.md) | Casos de prueba derivados de los criterios (CP-01 … CP-53) |
 
 ---
 
