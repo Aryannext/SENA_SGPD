@@ -28,21 +28,24 @@ RUN composer install \
 # ── Etapa 2: aplicación ──────────────────────────────────────────────────────
 FROM php:8.2-apache
 
-# Extensiones que exigen PhpSpreadsheet (lectura de Excel) y PDO MySQL.
+# Extensiones que exigen las dependencias del proyecto.
+#
+# Solo estas cinco: se comprobo contra composer.lock cuales son requisito real
+# y cuales venian de sugerencias. intl y bcmath no hacen falta, y libicu-dev
+# es de lo mas caro de compilar en un servidor con poca memoria.
+#
+# ctype, dom, fileinfo, iconv, json, libxml, mbstring, simplexml, xml,
+# xmlreader, xmlwriter y zlib ya vienen en la imagen base.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libzip-dev \
         libpng-dev \
         libjpeg62-turbo-dev \
         libfreetype6-dev \
-        libicu-dev \
-        libxml2-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j"$(nproc)" \
         pdo_mysql \
         zip \
         gd \
-        intl \
-        bcmath \
     && apt-get purge -y --auto-remove \
     && rm -rf /var/lib/apt/lists/*
 
