@@ -248,7 +248,37 @@ Impide que códigos de otro programa que aparezcan en el PDF contaminen la estru
 
 ---
 
-## 13.7 Ficha y programa
+## 13.7 Novedades de retiro
+
+### RN-26 · La novedad de retiro se deriva del estado del aprendiz
+⚙️ Código · `NovedadRetiroService::sincronizar()`
+
+Sofía Plus no entrega una hoja de novedades: entrega el estado actual de cada aprendiz.
+La novedad se reconstruye con la huella que dejaron sus juicios evaluativos:
+
+| Campo | Origen |
+|---|---|
+| `motivo` | El propio estado (`RETIRO VOLUNTARIO`, `TRASLADADO`, `CANCELADO`…) |
+| `fecha` | La del último juicio que se le registró |
+| `id_funcionario` | Quien registró ese último juicio |
+| `id_fase` | La fase del último resultado que alcanzó a aprobar |
+
+**Estados que cuentan como salida:** los que contienen `RETIRO`, `CANCELAD`,
+`CANCELAMIENTO`, `TRASLADAD` o `DESERC`. Se comparan por contenido porque Sofía Plus
+añade sufijos. `APLAZADO`, `CONDICIONADO`, `CERTIFICADO` y `POR CERTIFICAR` **no** son
+salidas: el aprendiz sigue vinculado.
+
+**Sincronización:** se ejecuta al final de cada importación. Es idempotente —actualiza
+en vez de duplicar— y si un aprendiz vuelve a formación, su novedad se elimina.
+
+> **Es un dato derivado, no declarado.** La fase de abandono y el instructor son
+> inferencias razonables, no un registro que alguien haya hecho. Sirven para detectar
+> patrones; no deberían usarse como base de una decisión sobre una persona concreta sin
+> contrastarlos primero.
+
+---
+
+## 13.8 Ficha y programa
 
 ### RN-23 · El estado de la ficha se normaliza a tres valores
 🛢️ Esquema + ⚙️ Código · `EN EJECUCION`, `TERMINADA`, `CANCELADA`; ante un valor
@@ -266,7 +296,7 @@ importaciones.
 
 ---
 
-## 13.8 Cumplimiento de las reglas del enunciado
+## 13.9 Cumplimiento de las reglas del enunciado
 
 El enunciado propone diez reglas de negocio de ejemplo. Cobertura:
 
@@ -294,7 +324,7 @@ vivir una regla. Las tres restantes son de dos naturalezas distintas:
 
 ---
 
-## 13.9 Reglas que faltan por aplicar
+## 13.10 Reglas que faltan por aplicar
 
 | RN | Regla | Mecanismo propuesto |
 |---|---|---|

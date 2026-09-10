@@ -23,16 +23,16 @@ variante avanzada (b).
 | b3 · Formulario de importación de juicios | RF-01, RF-06 | HU-01, HU-02 | ✅ |
 | b4 · Avance por aprendiz con gráfica por competencia **y por resultado** | RF-16 | HU-07 | 🟡 falta el seguimiento gráfico a nivel de resultado |
 | b5a · Total de aprendices, aprobados y por evaluar | RF-08 | HU-04 | ✅ |
-| b5b · Filtro por aprendiz, estado, documento, **competencia y resultado** | RF-13, RF-14 | HU-06 | 🟡 faltan dos de los cinco filtros |
+| b5b · Filtro por aprendiz, estado, documento, **competencia y resultado** | RF-13, RF-14 | HU-06 | ✅ los cinco filtros en la barra |
 | b5c · Pendientes de cada aprendiz agrupados por estado | RF-08 | HU-04 | ✅ |
 | b5d · % de avance por aprendiz según cada competencia | RF-16 | HU-07 | ✅ |
 | b5e · % de aprobación por competencia | RF-11 | HU-09 | ✅ |
 | b6 · Relacionar competencias y resultados con fases y actividades | RF-21, RF-22, RF-25 | HU-13, HU-14 | ✅ |
 | b7 · Cumplimiento por fase con aprobados y pendientes | RF-10, RF-27, RF-28 | HU-10, HU-11 | ✅ |
 
-**Cobertura del enunciado:** 9 de 11 puntos completos, 2 parciales. Ambos parciales
-tienen la misma causa: falta exponer en la interfaz un nivel de detalle —el resultado de
-aprendizaje— que el backend ya sabe manejar.
+**Cobertura del enunciado:** 10 de 11 puntos completos, 1 parcial. El único parcial que
+queda es b4: falta la gráfica de seguimiento a nivel de resultado de aprendizaje, aunque
+el dato ya se muestra en la tabla del perfil y ya se puede filtrar por él.
 
 ### Las diez preguntas de la coordinación
 
@@ -91,10 +91,10 @@ los que efectivamente fueron evaluados. Ver RN-13.
 | RF-26 | HU-13 | RN-22 | `Ficha::linkToProjectByProgram()` | CP-26 |
 | RF-27 | HU-10 | — | `Fase::cumplimientoPorFase()` | CP-27 |
 | RF-28 | HU-11 | — | `DashboardController::faseDetalle()` | CP-28 |
-| RF-29 | HU-15 | — | ⛔ **sin construir** | CP-29 |
-| RF-30 | HU-15 | — | `DesercionController::stats()` (sin datos) | CP-30 |
-| RF-31 | HU-15 | — | `DesercionController::stats()` (sin datos) | CP-30 |
-| RF-32 | HU-15 | — | `DesercionController::stats()` (sin datos) | CP-30 |
+| RF-29 | HU-15 | RN-26 | `NovedadRetiroService::sincronizar()` | **CP-29**, CP-55 |
+| RF-30 | HU-15 | RN-26 | `DesercionController::stats()` | CP-30 |
+| RF-31 | HU-15 | RN-26 | `DesercionController::stats()` | CP-30 |
+| RF-32 | HU-15 | RN-26 | `DesercionController::stats()` | CP-30 |
 | RF-33 | HU-15 | — | `DesercionController::predecir()` | CP-31 |
 | RF-34 | HU-16 | — | `AIController::send()` + `DataContextService` | CP-32 |
 | RF-35 | HU-16 | — | `OllamaService::chatStream()` | CP-33 |
@@ -138,6 +138,7 @@ regresión permanentes.
 | RN-23 | `normalizeEstadoFicha()` | 🛢️⚙️ | CP-03 |
 | RN-24 | `normalizeModalidad()` | 🛢️⚙️ | CP-03 |
 | RN-25 | `nu_ficha` / `codigo_programa` UNIQUE | 🛢️ | CP-06 |
+| RN-26 | `NovedadRetiroService::sincronizar()` | ⚙️ | CP-29, CP-55, CP-56 |
 
 ---
 

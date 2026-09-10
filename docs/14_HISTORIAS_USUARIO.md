@@ -149,7 +149,7 @@ intervención, **para** dirigir mi tiempo a quien más lo necesita.
 **Como** instructor, **quiero** filtrar el directorio por estado, documento, nombre,
 competencia y resultado de aprendizaje, **para** llegar rápido a un caso puntual.
 
-**Prioridad:** M · **Estado:** 🟡 · **Requisitos:** RF-13, RF-14
+**Prioridad:** M · **Estado:** ✅ · **Requisitos:** RF-13, RF-14
 
 **Criterios de aceptación**
 
@@ -170,10 +170,11 @@ competencia y resultado de aprendizaje, **para** llegar rápido a un caso puntua
    **cuando** se aplican,
    **entonces** actúan de forma acumulativa.
 
-> ⚠️ Los criterios 3 y 4 **no se cumplen**. El filtro por competencia está construido en
-> el backend y en el JavaScript, pero el control no existe en ninguna vista; el filtro
-> por resultado de aprendizaje no está construido. Ambos los exige el enunciado.
-> Defecto **F-08**.
+> Los criterios 3 y 4 estuvieron incumplidos: el filtro por competencia existía en el
+> backend y en el JavaScript, pero el control no estaba en ninguna vista, y el de
+> resultado de aprendizaje no existía. Ambos los exige el enunciado. Defecto **F-08**,
+> corregido: los cinco filtros están ahora en la barra, el de resultado depende del de
+> competencia, y se añadió un botón para limpiarlos.
 
 ---
 
@@ -341,7 +342,7 @@ ninguna actividad y asignarlos yo, **para** completar la estructura del proyecto
 **Como** coordinador académico, **quiero** ver los motivos de retiro, en qué fase
 ocurren y qué instructor los reporta, **para** intervenir sobre las causas.
 
-**Prioridad:** M · **Estado:** ⛔ · **Requisitos:** RF-29 a RF-32
+**Prioridad:** M · **Estado:** ✅ · **Requisitos:** RF-29 a RF-32
 
 **Criterios de aceptación**
 
@@ -356,11 +357,16 @@ ocurren y qué instructor los reporta, **para** intervenir sobre las causas.
    **entonces** veo un mensaje claro de que no hay datos, y **ninguna gráfica dibuja
    valores inventados**.
 
-> ⚠️ Ningún criterio se cumple. El módulo consulta la tabla `novedad_retiro`, en la que
-> **ninguna línea del sistema escribe**: con 6 retiros y 1 traslado ya importados, el
-> endpoint devuelve `{"motivos":[],"instructores":[],"auditoria":[]}`. Además la gráfica
-> dibuja un segmento ficticio «Sin datos», que puede leerse como un dato real.
-> Defecto **F-02**.
+> Ningún criterio se cumplía: el módulo consultaba `novedad_retiro`, una tabla en la que
+> **ninguna línea del sistema escribía**. Con 6 retiros y 1 traslado ya importados, el
+> endpoint devolvía `{"motivos":[],"instructores":[],"auditoria":[]}`, y la gráfica
+> dibujaba un segmento ficticio «Sin datos» que podía leerse como un dato real.
+> Defecto **F-02**, corregido.
+>
+> Ahora la importación deriva las novedades del estado reportado. Verificado con la
+> muestra: 7 novedades, con su fase de abandono e instructor resueltos. El criterio 3 se
+> cumple también: sin datos se muestra un estado vacío explícito y **ninguna gráfica
+> dibuja valores inventados**.
 
 ---
 
@@ -468,17 +474,17 @@ palabras, **para** obtener respuestas sin construir consultas ni filtros.
 | Épica | Historias | ✅ | 🟡 | ⛔ |
 |---|--:|--:|--:|--:|
 | 1 · Traer los datos de Sofía Plus | 3 | 2 | 1 | 0 |
-| 2 · Seguir el avance del grupo | 5 | 4 | 1 | 0 |
+| 2 · Seguir el avance del grupo | 5 | 5 | 0 | 0 |
 | 3 · Analizar competencias y fases | 4 | 4 | 0 | 0 |
 | 4 · Estructurar el proyecto formativo | 2 | 1 | 1 | 0 |
-| 5 · Entender la deserción | 1 | 0 | 0 | 1 |
+| 5 · Entender la deserción | 1 | 1 | 0 | 0 |
 | 6 · Consultar con ayuda de la IA | 3 | 3 | 0 | 0 |
 | 7 · Controlar el acceso | 1 | 0 | 0 | 1 |
-| **Total** | **19** | **14** | **3** | **2** |
+| **Total** | **19** | **16** | **2** | **1** |
 
-Las dos historias sin implementar (HU-15 y HU-19) tienen prioridad `M`, y HU-19 bloquea
-el despliegue con datos reales.
+**HU-19, el control de acceso, es la única historia sin implementar**, y es la que
+bloquea cualquier despliegue con datos reales de aprendices.
 
-De las tres parciales, HU-06 es la más relevante para la evaluación: sus criterios 3 y 4
-—filtrar por competencia y por resultado de aprendizaje— los exige el enunciado de
-forma explícita.
+Las dos parciales incumplen un criterio cada una, ninguno exigido por el enunciado:
+HU-02 no distingue registros nuevos de actualizados (F-11) y HU-13 reemplaza la
+estructura del proyecto sin advertirlo antes (RN-19).

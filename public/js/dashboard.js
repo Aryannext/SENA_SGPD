@@ -92,11 +92,13 @@ const Dashboard = {
             
             const estado = document.getElementById('filter-estado')?.value;
             const comp   = document.getElementById('filter-competencia')?.value;
+            const resAp  = document.getElementById('filter-resultado')?.value;
             const doc    = document.getElementById('filter-documento')?.value;
             const q      = document.getElementById('filter-busqueda')?.value;
 
             if (estado) params.set('estado', estado);
             if (comp)   params.set('competencia', comp);
+            if (resAp)  params.set('resultado', resAp);
             if (doc)    params.set('documento', doc);
             if (q)      params.set('q', q);
 
@@ -105,11 +107,9 @@ const Dashboard = {
             this.renderCharts();
             this.renderTable(this.data.avance_por_aprendiz);
             
-            // Only populate filters if not already populated
-            const estadoSelect = document.getElementById('filter-estado');
-            if (estadoSelect && estadoSelect.options.length <= 1) {
-                this.populateFilters();
-            }
+            // Los catálogos dependen de la ficha activa, así que se repueblan
+            // en cada carga; populateFilters conserva la selección vigente.
+            this.populateFilters();
         } catch (e) {
             console.error('Error fetching stats:', e);
             APP.toast('Error obteniendo datos de la ficha.', 'error');
@@ -433,6 +433,57 @@ const Dashboard = {
                 compSelect.appendChild(opt);
             });
         }
+
+        this.populateResultados();
+    },
+
+    /**
+     * Puebla el selector de resultados de aprendizaje. Si hay una competencia
+     * elegida, muestra solo los suyos: son 75 en total y una lista plana no se
+     * puede usar.
+     */
+    populateResultados() {
+        const select = document.getElementById('filter-resultado');
+        if (!select) return;
+
+        const catalogo = this.data?.resultados_aprendizaje || [];
+        const idComp = document.getElementById('filter-competencia')?.value;
+        const seleccionado = select.value;
+
+        const visibles = idComp
+            ? catalogo.filter(r => String(r.id_competencia) === String(idComp))
+            : catalogo;
+
+        select.innerHTML = '<option value="">Todos</option>';
+        visibles.forEach(r => {
+            const opt = document.createElement('option');
+            opt.value = r.id_resultado;
+            opt.textContent = r.cod_resultado + ' - ' + APP.truncate(r.nombre_resultado, 55);
+            select.appendChild(opt);
+        });
+
+        // Conservar la selección previa si sigue siendo válida
+        if (seleccionado && visibles.some(r => String(r.id_resultado) === seleccionado)) {
+            select.value = seleccionado;
+        }
+    },
+
+    /** Al cambiar de competencia se recalculan los resultados disponibles. */
+    onCompetenciaChange() {
+        const select = document.getElementById('filter-resultado');
+        if (select) select.value = '';
+        this.populateResultados();
+    },
+
+    /** Limpia todos los filtros y recarga la tabla completa. */
+    clearFilters() {
+        ['filter-estado', 'filter-competencia', 'filter-resultado', 'filter-documento', 'filter-busqueda']
+            .forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+        this.populateResultados();
+        this.applyFilters();
     },
 
     quickFilterEstado(estado) {
@@ -465,11 +516,13 @@ const Dashboard = {
             
             const estado = document.getElementById('filter-estado')?.value;
             const comp   = document.getElementById('filter-competencia')?.value;
+            const resAp  = document.getElementById('filter-resultado')?.value;
             const doc    = document.getElementById('filter-documento')?.value;
             const q      = document.getElementById('filter-busqueda')?.value;
 
             if (estado) params.set('estado', estado);
             if (comp)   params.set('competencia', comp);
+            if (resAp)  params.set('resultado', resAp);
             if (doc)    params.set('documento', doc);
             if (q)      params.set('q', q);
 

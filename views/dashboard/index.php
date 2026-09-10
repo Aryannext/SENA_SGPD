@@ -123,6 +123,20 @@
     </div>
     
     <div class="form-group">
+        <label class="form-label">Competencia</label>
+        <select class="form-control" id="filter-competencia" onchange="Dashboard.onCompetenciaChange()">
+            <option value="">Todas</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Resultado de Aprendizaje</label>
+        <select class="form-control" id="filter-resultado">
+            <option value="">Todos</option>
+        </select>
+    </div>
+
+    <div class="form-group">
         <label class="form-label">Documento</label>
         <input type="text" class="form-control" id="filter-documento" placeholder="Buscar por documento...">
     </div>
@@ -134,6 +148,12 @@
         <label class="form-label">&nbsp;</label>
         <button class="btn btn-primary" onclick="Dashboard.applyFilters()">
             <i class="fas fa-filter"></i> Filtrar
+        </button>
+    </div>
+    <div class="form-group" style="flex:0;">
+        <label class="form-label">&nbsp;</label>
+        <button class="btn btn-secondary" onclick="Dashboard.clearFilters()">
+            <i class="fas fa-eraser"></i> Limpiar
         </button>
     </div>
 </div>

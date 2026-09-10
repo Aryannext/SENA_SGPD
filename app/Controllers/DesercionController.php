@@ -69,46 +69,71 @@ final class DesercionController extends Controller
         ]);
     }
 
+    /**
+     * Estimación de riesgo de deserción apoyada en el modelo local.
+     *
+     * Antes construía la petición con cURL crudo, no comprobaba errores y, cuando
+     * la llamada fallaba, devolvía un texto fijo inventado indistinguible de una
+     * respuesta real. Ahora usa OllamaService, envía datos reales de la base y,
+     * si algo falla, lo dice.
+     */
     public function predecir(): void
     {
-        // En un caso real, recolectaríamos datos históricos de la BD
-        // Aquí pasamos el contexto a Ollama y le pedimos una predicción.
         $ollama = new \App\Services\OllamaService();
         if (!$ollama->isAvailable()) {
-            $this->json(['error' => 'El servicio SENA-IA (Ollama) no está disponible.'], 500);
+            $this->json(['error' => 'El servicio SENA-IA (Ollama) no está disponible.'], 503);
             return;
         }
 
-        $prompt = "Eres un analista predictivo del SENA. Analiza la viabilidad de deserción de los aprendices que tienen más de 2 juicios evaluativos 'NO APROBADO'. Responde en menos de 50 palabras si encuentras un patrón de riesgo alto.";
+        $db = new class extends Model {
+            public static function run(string $sql, array $p = []): array { return static::query($sql, $p); }
+        };
 
-        // Simulamos el historial
-        $history = [
-            ['role' => 'user', 'content' => $prompt]
-        ];
+        $motivos = $db::run('SELECT motivo, COUNT(*) n FROM novedad_retiro GROUP BY motivo ORDER BY n DESC');
+        $porFase = $db::run('
+            SELECT COALESCE(f.nombre_fase, "Sin fase determinada") AS fase, COUNT(*) n
+              FROM novedad_retiro nr
+              LEFT JOIN fase f ON nr.id_fase = f.id_fase
+             GROUP BY f.id_fase, f.nombre_fase
+             ORDER BY n DESC
+        ');
+        $enRiesgo = $db::run('
+            SELECT COUNT(*) n FROM (
+                SELECT a.id_aprendiz
+                  FROM aprendiz a
+                  JOIN calificacion c ON c.id_aprendiz = a.id_aprendiz
+                 WHERE a.estado LIKE "%FORMACION%"
+                 GROUP BY a.id_aprendiz
+                HAVING SUM(c.jui_evaluativo = "NO APROBADO") >= 2
+            ) t
+        ');
 
-        // Llama a Ollama sin streaming (puedes usar un endpoint HTTP interno)
-        // Para simplificar, devolvemos un mensaje fijo simulando la IA si no hay método síncrono.
-        // Asumiendo que OllamaService no tiene método síncrono público expuesto fácil, 
-        // usaremos curl básico.
+        if ($motivos === [] && (int) ($enRiesgo[0]['n'] ?? 0) === 0) {
+            $this->json([
+                'prediccion' => 'Todavía no hay retiros registrados ni aprendices con juicios no aprobados: no hay base para estimar un patrón de deserción.',
+                'sin_datos'  => true,
+            ]);
+            return;
+        }
 
-        $config = require __DIR__ . '/../../config/ollama.php';
-        $ch = curl_init($config['base_url'] . '/api/generate');
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
-            'model' => $config['model'],
-            'prompt' => $prompt,
-            'stream' => false
-        ]));
-        
-        $response = curl_exec($ch);
-        curl_close($ch);
+        $contexto = "Retiros por motivo: " . json_encode($motivos, JSON_UNESCAPED_UNICODE)
+            . "\nRetiros por fase: " . json_encode($porFase, JSON_UNESCAPED_UNICODE)
+            . "\nAprendices activos con 2 o más juicios NO APROBADO: " . ($enRiesgo[0]['n'] ?? 0);
 
-        $result = json_decode($response, true);
-        $respuestaIA = $result['response'] ?? "SENA-IA detecta riesgo moderado de deserción en aprendices con más de 2 juicios NO APROBADOS en Fase de Análisis con instructores estrictos.";
+        $prompt = 'Eres un analista del SENA. Con los datos que se te dan, señala en menos de '
+            . '60 palabras si hay un patrón de riesgo de deserción y en qué fase se concentra. '
+            . 'No inventes cifras: usa solo las que aparecen a continuación.';
+
+        try {
+            $respuesta = $ollama->chat([['role' => 'user', 'content' => $prompt]], $contexto);
+        } catch (\Throwable $e) {
+            $this->json(['error' => 'SENA-IA no pudo completar el análisis: ' . $e->getMessage()], 502);
+            return;
+        }
 
         $this->json([
-            'prediccion' => $respuestaIA
+            'prediccion' => trim(preg_replace('/<think>.*?<\/think>/s', '', $respuesta) ?? $respuesta),
+            'sin_datos'  => false,
         ]);
     }
 }

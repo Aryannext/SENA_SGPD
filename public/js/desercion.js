@@ -46,8 +46,11 @@ const Desercion = {
 
         if (this.chartMotivos) this.chartMotivos.destroy();
 
+        // Sin datos no se dibuja nada: un segmento ficticio se lee como un dato
+        // real. Se muestra un estado vacío explícito en su lugar.
         if (!motivos || motivos.length === 0) {
-            motivos = [{ motivo: 'Sin datos', cantidad: 1 }];
+            this.mostrarVacio(ctx, 'No hay retiros registrados');
+            return;
         }
 
         const labels = motivos.map(m => m.motivo);
@@ -83,6 +86,11 @@ const Desercion = {
 
         if (this.chartInstructores) this.chartInstructores.destroy();
 
+        if (!instructores || instructores.length === 0) {
+            this.mostrarVacio(ctx, 'Sin retiros atribuibles a un instructor');
+            return;
+        }
+
         const labels = instructores.map(i => i.nombre);
         const data = instructores.map(i => i.total_retiros);
 
@@ -109,6 +117,21 @@ const Desercion = {
                 }
             }
         });
+    },
+
+    /** Sustituye un lienzo por un mensaje, en vez de dibujar datos inventados. */
+    mostrarVacio(canvas, mensaje) {
+        const contenedor = canvas.parentElement;
+        if (!contenedor) return;
+        canvas.style.display = 'none';
+        let aviso = contenedor.querySelector('.estado-vacio');
+        if (!aviso) {
+            aviso = document.createElement('div');
+            aviso.className = 'estado-vacio empty-state';
+            aviso.style.cssText = 'padding:40px 20px;text-align:center;color:var(--text-muted);';
+            contenedor.appendChild(aviso);
+        }
+        aviso.innerHTML = '<i class="fas fa-check-circle" style="font-size:28px;color:var(--success);margin-bottom:10px;display:block;"></i>' + APP.esc(mensaje);
     },
 
     renderAuditoriaTable(auditoria) {

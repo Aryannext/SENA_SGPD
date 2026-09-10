@@ -205,25 +205,97 @@ final class ImportacionTest extends TestCase
 
     // ── Estado del módulo de deserción ──────────────────────────────────────
 
+    // ── CP-29 · Novedades de retiro ─────────────────────────────────────────
+
     /**
-     * CP-29 · defecto F-02, documentado como prueba pendiente de pasar.
+     * RF-29 · regresión de F-02.
      *
-     * Con 6 retiros y 1 traslado importados, `novedad_retiro` debería tener 7
-     * filas. Hoy queda vacía porque ninguna línea del sistema escribe en ella.
-     * La aserción está invertida a propósito: cuando se implemente RF-29 esta
-     * prueba fallará, y ese fallo es la señal de que hay que activar CP-29.
+     * El módulo de deserción leía `novedad_retiro`, una tabla en la que ninguna
+     * línea del sistema escribía: las tres gráficas y la tabla de trazabilidad
+     * salían siempre vacías. Ahora la importación deriva las novedades del estado
+     * reportado por Sofía Plus.
      */
-    public function testElModuloDeDesercionSigueSinRegistrarNovedades(): void
+    public function testLaImportacionRegistraUnaNovedadPorCadaAprendizRetirado(): void
     {
         $retirados = (int) $this->pdo->query(
             "SELECT COUNT(*) FROM aprendiz WHERE estado LIKE '%RETIRO%' OR estado LIKE '%TRASLADADO%'"
         )->fetchColumn();
-        $this->assertSame(7, $retirados, 'la muestra trae 6 retiros y 1 traslado');
+        $this->assertSame(7, $retirados, 'la muestra trae 6 retiros voluntarios y 1 traslado');
 
-        $this->assertSame(
-            0,
-            $this->contar('novedad_retiro'),
-            'F-02: si esto deja de ser 0, RF-29 ya está implementado y hay que activar CP-29'
-        );
+        $this->assertSame(7, $this->contar('novedad_retiro'), 'F-02: debe haber una novedad por cada aprendiz que salió');
+    }
+
+    /** El motivo debe ser el estado real, no un texto genérico. */
+    public function testLaNovedadConservaElMotivoReal(): void
+    {
+        $motivos = [];
+        foreach ($this->pdo->query('SELECT motivo, COUNT(*) n FROM novedad_retiro GROUP BY motivo') as $fila) {
+            $motivos[$fila['motivo']] = (int) $fila['n'];
+        }
+
+        $this->assertSame(6, $motivos['RETIRO VOLUNTARIO'] ?? 0);
+        $this->assertSame(1, $motivos['TRASLADADO'] ?? 0);
+    }
+
+    /** Ningún aprendiz activo puede tener novedad de retiro. */
+    public function testNingunAprendizActivoTieneNovedad(): void
+    {
+        $intrusos = (int) $this->pdo->query(
+            "SELECT COUNT(*) FROM novedad_retiro nr
+               JOIN aprendiz a ON nr.id_aprendiz = a.id_aprendiz
+              WHERE a.estado LIKE '%FORMACION%'"
+        )->fetchColumn();
+
+        $this->assertSame(0, $intrusos, 'un aprendiz en formación no ha desertado');
+    }
+
+    /** Reimportar no debe duplicar novedades: la sincronización es idempotente. */
+    public function testLasNovedadesNoSeDuplicanAlReimportar(): void
+    {
+        $antes = $this->contar('novedad_retiro');
+        $this->importarMuestra();
+
+        $this->assertSame($antes, $this->contar('novedad_retiro'), 'la sincronización debe actualizar, no duplicar');
+    }
+
+    /** Si un aprendiz vuelve a formación, su novedad desaparece. */
+    public function testLaNovedadSeRetiraSiElAprendizVuelveAFormacion(): void
+    {
+        $id = (int) $this->pdo->query(
+            "SELECT id_aprendiz FROM aprendiz WHERE estado LIKE '%RETIRO%' LIMIT 1"
+        )->fetchColumn();
+        $this->assertTrue($id > 0, 'debe existir al menos un aprendiz retirado');
+
+        $this->pdo->exec("UPDATE aprendiz SET estado = 'EN FORMACION' WHERE id_aprendiz = {$id}");
+        (new \App\Services\NovedadRetiroService())->sincronizar();
+
+        $quedan = (int) $this->pdo->query(
+            "SELECT COUNT(*) FROM novedad_retiro WHERE id_aprendiz = {$id}"
+        )->fetchColumn();
+        $this->assertSame(0, $quedan, 'al reingresar, la novedad de retiro debe eliminarse');
+
+        // Se restaura el estado para no afectar a las demás pruebas.
+        $this->pdo->exec("UPDATE aprendiz SET estado = 'RETIRO VOLUNTARIO' WHERE id_aprendiz = {$id}");
+        (new \App\Services\NovedadRetiroService())->sincronizar();
+    }
+
+    // ── CP-15 · Filtros del enunciado ───────────────────────────────────────
+
+    /**
+     * RF-14 · el enunciado exige filtrar también por competencia y por resultado
+     * de aprendizaje. Se comprueba que el backend sepa hacerlo.
+     */
+    public function testElCatalogoDeResultadosCubreLasCompetencias(): void
+    {
+        $resultados = $this->pdo->query(
+            'SELECT DISTINCT r.id_resultado, r.id_competencia
+               FROM resultado_aprendizaje r
+               JOIN calificacion c ON c.id_resultado = r.id_resultado'
+        )->fetchAll();
+
+        $this->assertCount(75, $resultados, 'los 75 resultados deben poder ofrecerse en el filtro');
+
+        $competencias = array_unique(array_column($resultados, 'id_competencia'));
+        $this->assertSame(20, count($competencias), 'cada competencia debe tener al menos un resultado filtrable');
     }
 }

@@ -119,7 +119,7 @@ real, 14,0 s con el de muestra.
 | **CP-12** | Competencias críticas | 5 competencias, orden ascendente | ⏳ pendiente |
 | **CP-13** | **Regresión F-01:** foco de atención | Todo aprendiz Crítico aparece en la lista | ✅ **automatizado** |
 | **CP-14** | Directorio de aprendices | Una fila por aprendiz de la ficha, con avance | ✅ ejecutado |
-| **CP-15** | Filtros combinados | Los 5 filtros del enunciado, acumulativos | ❌ **falla** — faltan 2 filtros (F-08) |
+| **CP-15** | Filtros combinados | Los 5 filtros del enunciado, acumulativos | ✅ ejecutado — 41/34 sin filtro, 0/3 por competencia, 0/1 por resultado |
 
 ### CP-13 · Detalle — prueba de regresión obligatoria
 
@@ -187,9 +187,11 @@ filtrado.
 
 | Caso | Objetivo | Resultado esperado | Estado |
 |---|---|---|---|
-| **CP-29** | Registrar novedad de retiro | Con 6 retiros y 1 traslado importados, `novedad_retiro` tiene 7 filas | ❌ **falla** — la tabla queda vacía (F-02) |
-| **CP-30** | Motivos, instructores y trazabilidad | Datos coherentes con `novedad_retiro` | ❌ **falla** — `{"motivos":[],"instructores":[],"auditoria":[]}` |
-| **CP-31** | Estado vacío honesto | Sin datos, mensaje explícito y **ninguna gráfica con valores inventados** | ❌ **falla** — dibuja un segmento ficticio «Sin datos» |
+| **CP-29** | Registrar novedad de retiro | Con 6 retiros y 1 traslado importados, `novedad_retiro` tiene 7 filas | ✅ **automatizado** |
+| **CP-30** | Motivos, instructores y trazabilidad | Datos coherentes con `novedad_retiro` | ✅ ejecutado — 7 registros, 4 instructores, fase resuelta |
+| **CP-31** | Estado vacío honesto | Sin datos, mensaje explícito y **ninguna gráfica con valores inventados** | ✅ ejecutado |
+| **CP-55** | Idempotencia de las novedades | Reimportar no duplica; si el aprendiz reingresa, su novedad se elimina | ✅ **automatizado** |
+| **CP-56** | Clasificación de estados de salida | Retiro, traslado, cancelación y deserción son salidas; aplazado y condicionado no | ✅ **automatizado** |
 
 ---
 
@@ -282,22 +284,23 @@ lleva `HttpOnly` y `SameSite`.
 
 | Resultado | Casos |
 |---|--:|
-| ✅ **Automatizado** | 11 |
-| ✅ Pasa, ejecutado a mano | 16 |
-| ❌ Falla | 10 |
+| ✅ **Automatizado** | 14 |
+| ✅ Pasa, ejecutado a mano | 19 |
+| ❌ Falla | 6 |
 | ⏳ Pendiente | 17 |
-| **Total** | **54** |
+| **Total** | **56** |
 
 ### Lo que hay automatizado
 
-`php tests/run.php` — **43 pruebas, 559 aserciones, 55 s.**
+`php tests/run.php` — **52 pruebas, 31 s.**
 
 | Archivo | Cubre | Pruebas |
 |---|---|--:|
 | `tests/Contract/RutasTest.php` | CP-36, CP-51 | 6 |
 | `tests/Unit/ImportadorTest.php` | CP-47, CP-48, CP-54 | 14 |
 | `tests/Unit/InsightsTest.php` | CP-10, CP-13 | 8 |
-| `tests/Integration/ImportacionTest.php` | CP-03, CP-05, CP-06 | 7 |
+| `tests/Unit/NovedadRetiroTest.php` | CP-56 | 4 |
+| `tests/Integration/ImportacionTest.php` | CP-03, CP-05, CP-06, CP-29, CP-55 | 12 |
 | `tests/Regression/EscapadoTest.php` | CP-52 | 8 |
 
 Los tres defectos ya corregidos tienen su prueba de regresión: **F-01** en
@@ -324,10 +327,11 @@ descubrió al escribir `ImportadorTest` y quedó cubierto por CP-54.
 | Caso | Defecto | Requisito |
 |---|---|---|
 | CP-07 | F-11 · el resumen no distingue nuevos de actualizados | RF-06 |
-| CP-15 | F-08 · faltan los filtros de competencia y resultado | RF-14 |
 | CP-21 | V-02 · borrado anónimo y sin transacción | RF-20, RNF-06 |
 | CP-24 | Sin validación al crear fase y actividad | RF-23, RF-24 |
-| CP-29, CP-30, CP-31 | F-02 · nada escribe en `novedad_retiro` | RF-29 … RF-32 |
 | CP-38 | Sin autenticación | RF-40, RNF-06 |
 | CP-42 | RN-04 sin aplicar | RN-04 |
 | CP-53 | Sin cabeceras de seguridad | RNF-10 |
+
+Cuatro de los seis dependen de la misma historia sin implementar: **HU-19, el control
+de acceso**.

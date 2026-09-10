@@ -176,7 +176,7 @@ Documento, nombre, estado, aprobados, por evaluar, porcentaje y barra de progres
   coincide con el del perfil individual.
 
 ### RF-14 · Filtrar el directorio
-**Prioridad:** M · **Estado:** 🟡
+**Prioridad:** M · **Estado:** ✅
 
 El enunciado exige filtrar por **aprendiz, estado, documento, competencia y resultado
 de aprendizaje**.
@@ -186,13 +186,21 @@ de aprendizaje**.
 | Nombre / apellido | ✅ | ✅ |
 | Estado | ✅ | ✅ |
 | Documento | ✅ | ✅ |
-| Competencia | ✅ | ⛔ falta el `<select>` en la vista |
-| Resultado de aprendizaje | ⛔ | ⛔ |
+| Competencia | ✅ | ✅ |
+| Resultado de aprendizaje | ✅ | ✅ |
 
 - **Criterio de aceptación:** los cinco filtros son combinables y el conteo de registros
   se actualiza en cada cambio.
-- **Brecha conocida:** defecto **F-08**. `dashboard.js` ya lee un
-  `#filter-competencia` que ninguna vista declara.
+- **Realización:** `GET /api/dashboard/filtrar` acepta `estado`, `documento`, `q`,
+  `competencia` y `resultado`. La respuesta de `stats` publica `resultados_aprendizaje`,
+  el catálogo con el que la interfaz puebla el selector.
+- **Diseño:** el selector de resultado depende del de competencia. Con 75 resultados,
+  una lista plana no se puede usar; al elegir competencia se reduce a los suyos.
+- **Verificación:** sin filtro, el primer aprendiz muestra 41 aprobados y 34 pendientes;
+  filtrando por una competencia de 3 resultados pasa a 0 y 3; filtrando por un resultado
+  concreto, a 0 y 1; al limpiar vuelve a 41 y 34.
+- **Historial:** defecto **F-08**, corregido. `dashboard.js` leía un
+  `#filter-competencia` que ninguna vista declaraba.
 
 ---
 
@@ -310,31 +318,50 @@ Es el requisito 7 del enunciado.
 > Alcance propio del SGPD; no exigido por el enunciado.
 
 ### RF-29 · Registrar la novedad de retiro de un aprendiz
-**Prioridad:** M · **Estado:** ⛔
+**Prioridad:** M · **Estado:** ✅
 
 Cuando un aprendiz pasa a un estado de retiro, cancelación o traslado, debe quedar una
-novedad con su motivo, la fase en que ocurrió y el funcionario que la reporta.
+novedad con su motivo, la fase en que ocurrió y el funcionario responsable.
 
 - **Criterio de aceptación:** tras importar un reporte con 6 retiros y 1 traslado, la
   tabla `novedad_retiro` contiene 7 registros.
-- **Brecha conocida:** **ninguna línea del sistema escribe en `novedad_retiro`**. Los
-  tres requisitos siguientes leen de esa tabla, por lo que hoy el módulo completo
-  muestra pantallas vacías. Ver **F-02**.
+- **Realización:** `App\Services\NovedadRetiroService::sincronizar()`, invocado al
+  final de cada importación.
+- **Cómo se deriva.** Sofía Plus no entrega una hoja de novedades: solo el estado actual
+  del aprendiz. La novedad se reconstruye con la huella que dejaron sus juicios:
+
+  | Campo | Origen |
+  |---|---|
+  | `motivo` | El propio estado del aprendiz |
+  | `fecha` | La del último juicio que se le registró |
+  | `id_funcionario` | Quien registró ese último juicio |
+  | `id_fase` | La fase del último resultado que alcanzó a aprobar |
+
+- **Idempotencia:** se ejecuta tras cada importación sin duplicar. Si un aprendiz vuelve
+  a formación, su novedad se elimina.
+- **Verificación:** 7 novedades con fase de abandono resuelta (Análisis, Ejecución,
+  Evaluación) e instructor identificado en los 7 casos.
+- **Historial:** defecto **F-02**, corregido.
 
 ### RF-30 · Graficar los motivos de retiro
-**Prioridad:** S · **Estado:** ⛔ — depende de RF-29.
+**Prioridad:** S · **Estado:** ✅ — verificado: 6 `RETIRO VOLUNTARIO`, 1 `TRASLADADO`.
 
 ### RF-31 · Graficar los retiros por instructor
-**Prioridad:** C · **Estado:** ⛔ — depende de RF-29.
+**Prioridad:** C · **Estado:** ✅ — verificado: 4 instructores con retiros atribuidos.
 
 ### RF-32 · Presentar la trazabilidad de los retiros
-**Prioridad:** S · **Estado:** ⛔ — depende de RF-29.
+**Prioridad:** S · **Estado:** ✅ — fecha, aprendiz, fase de abandono, motivo e instructor.
 
 ### RF-33 · Estimar el riesgo de deserción con IA
-**Prioridad:** C · **Estado:** 🟡
+**Prioridad:** C · **Estado:** ✅
 
-- **Brecha conocida:** el endpoint no envía datos reales al modelo y devuelve un texto
-  fijo inventado cuando la llamada falla, sin distinguirlo de una respuesta real.
+- **Criterio de aceptación:** la estimación se construye sobre datos reales de la base;
+  si el modelo no está disponible o falla, el sistema **lo dice** en vez de inventar.
+- **Realización:** `DesercionController::predecir()` envía motivos de retiro, retiros
+  por fase y número de aprendices activos con dos o más juicios `NO APROBADO`.
+- **Historial:** antes construía la petición con cURL crudo, no comprobaba errores y
+  devolvía un texto fijo inventado indistinguible de una respuesta real. Cuando no hay
+  retiros ni aprendices con juicios reprobados, responde que no hay base para estimar.
 
 ---
 
@@ -389,14 +416,16 @@ Degrada a entrada de texto en navegadores sin soporte.
 
 | Estado | Requisitos | % |
 |--------|-----------:|--:|
-| ✅ Implementado | 29 | 74,4 % |
-| 🟡 Parcial | 6 | 15,4 % |
-| ⛔ No implementado | 4 | 10,3 % |
+| ✅ Implementado | 35 | 89,7 % |
+| 🟡 Parcial | 4 | 10,3 % |
+| ⛔ No implementado | 0 | 0 % |
 | **Total (RF-01 … RF-39)** | **39** | **100 %** |
 
-Los cuatro no implementados son el módulo de deserción completo (RF-29 a RF-32) y todos
-dependen de un mismo faltante: nada escribe en `novedad_retiro`.
+**Ya no queda ningún requisito sin implementar.** El módulo de deserción (RF-29 a RF-32)
+y la estimación con IA (RF-33) se cerraron derivando las novedades de retiro del estado
+reportado por Sofía Plus; el filtro completo del enunciado (RF-14) se cerró exponiendo
+los selectores de competencia y de resultado de aprendizaje.
 
-Los seis parciales se concentran en dos causas: falta de validación en los endpoints de
-escritura (RF-20, RF-23, RF-24) y funcionalidad construida en el backend pero no
-expuesta en la interfaz (RF-06, RF-14, RF-33).
+Los cuatro parciales que quedan son de dos clases: falta de validación en endpoints de
+escritura (RF-20, RF-23, RF-24) y un resumen de importación que informa registros
+procesados en vez de nuevos (RF-06, defecto F-11).

@@ -32,6 +32,7 @@ final class ExcelImportService
         'funcionarios' => 0,
         'errores'      => 0,
         'filas_procesadas' => 0,
+        'novedades_retiro' => 0,
     ];
 
     private array $errors = [];
@@ -192,6 +193,16 @@ final class ExcelImportService
                 $this->stats['errores']++;
                 $this->errors[] = "Fila {$row}: " . $e->getMessage();
             }
+        }
+
+        // Las novedades de retiro se derivan del estado reportado: Sofía Plus no
+        // trae una hoja de novedades (RF-29).
+        try {
+            $novedades = (new NovedadRetiroService())->sincronizar($idFicha);
+            $this->stats['novedades_retiro'] = $novedades['creadas'] + $novedades['actualizadas'];
+        } catch (\Throwable $e) {
+            // Una novedad no sincronizada no debe invalidar toda la importación.
+            $this->errors[] = 'Novedades de retiro: ' . $e->getMessage();
         }
 
         return [

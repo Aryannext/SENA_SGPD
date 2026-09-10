@@ -56,6 +56,7 @@ final class DashboardController extends Controller
         $idFicha     = isset($_GET['id_ficha']) ? (int)$_GET['id_ficha'] : 0;
         $estado      = $_GET['estado'] ?? '';
         $competencia = $_GET['competencia'] ?? '';
+        $resultado   = $_GET['resultado'] ?? '';
         $documento   = $_GET['documento'] ?? '';
         $busqueda    = $_GET['q'] ?? '';
         
@@ -163,6 +164,10 @@ final class DashboardController extends Controller
             $condsTabla[] = "comp.id_competencia = ?";
             $paramsTabla[] = $competencia;
         }
+        if ($resultado) {
+            $condsTabla[] = "r.id_resultado = ?";
+            $paramsTabla[] = $resultado;
+        }
         $whereTabla = count($condsTabla) > 0 ? "WHERE " . implode(' AND ', $condsTabla) : "";
 
         $avancePorAprendiz = $db::run("
@@ -206,6 +211,19 @@ final class DashboardController extends Controller
             GROUP BY comp.id_competencia
             ORDER BY porcentaje DESC
         ", $paramsGlobal);
+
+        // Catálogo de resultados de aprendizaje evaluados en esta ficha. Alimenta
+        // el selector de la barra de filtros (RF-14) y va agrupado por competencia.
+        $resultadosCatalogo = $db::run("
+            SELECT DISTINCT r.id_resultado, r.cod_resultado, r.nombre_resultado,
+                   comp.id_competencia, comp.cod_competencia, comp.nombre as nombre_competencia
+            FROM resultado_aprendizaje r
+            JOIN competencia comp ON r.id_competencia = comp.id_competencia
+            JOIN calificacion c ON c.id_resultado = r.id_resultado
+            JOIN aprendiz a ON c.id_aprendiz = a.id_aprendiz
+            " . ($idFicha > 0 ? "WHERE a.id_ficha = {$idFicha}" : '') . "
+            ORDER BY comp.cod_competencia, r.cod_resultado
+        ");
 
         // Global Stats: Pendientes por Estado (Todos los estados, pero esto es informativo)
         // Wait, for pendientes, we usually want to know how many are pending overall.
@@ -288,6 +306,7 @@ final class DashboardController extends Controller
             'juicios_por_tipo'      => $juiciosPorTipo,
             'avance_por_aprendiz'   => $avancePorAprendiz,
             'avance_por_competencia' => $avancePorComp,
+            'resultados_aprendizaje' => $resultadosCatalogo,
             'pendientes_por_estado' => $pendientesPorEstado,
             'fases'                 => $fasesStats,
             'insights' => $insights,
@@ -363,6 +382,7 @@ final class DashboardController extends Controller
         $idFicha     = isset($_GET['id_ficha']) ? (int)$_GET['id_ficha'] : 0;
         $estado      = $_GET['estado'] ?? '';
         $competencia = $_GET['competencia'] ?? '';
+        $resultado   = $_GET['resultado'] ?? '';
         $documento   = $_GET['documento'] ?? '';
         $busqueda    = $_GET['q'] ?? '';
 
@@ -394,6 +414,10 @@ final class DashboardController extends Controller
         if ($competencia) {
             $tablaConditions[] = 'comp.id_competencia = ?';
             $tablaParams[]     = $competencia;
+        }
+        if ($resultado) {
+            $tablaConditions[] = 'r.id_resultado = ?';
+            $tablaParams[]     = $resultado;
         }
 
         $sqlTabla = "
