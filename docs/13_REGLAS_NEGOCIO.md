@@ -129,6 +129,13 @@ Es la regla 10 del enunciado. La normalización acepta las abreviaturas del orig
 > ni advertencia, se convierte silenciosamente en «pendiente». Es prudente para no
 > perder filas, pero conviene registrar cuántas conversiones por defecto ocurrieron.
 
+> **Defecto F-12, corregido.** El orden de las ramas estaba invertido: como la cadena
+> `NO APROBADO` contiene `APROB`, la rama de aprobación se evaluaba primero y **todo
+> juicio reprobado se almacenaba como `APROBADO`**. Pasó inadvertido porque el reporte
+> de la ficha ADSO 3142784 no contiene ni un solo `NO APROBADO`: el defecto habría
+> corrompido los datos en la primera ficha que sí tuviera juicios reprobados. Lo
+> encontró la prueba unitaria CP-54 al escribirla, no una revisión de código.
+
 ### RN-13 · Fecha, hora y funcionario del juicio son opcionales
 🛢️ Esquema · ambas columnas admiten `NULL`
 

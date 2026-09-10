@@ -37,6 +37,18 @@ class Model
     }
 
     /**
+     * Sustituye la conexión compartida.
+     *
+     * Existe para que las pruebas de integración apunten a una base de datos
+     * desechable en lugar de a la de trabajo. Pasar null restaura el
+     * comportamiento normal (leer config/database.php).
+     */
+    public static function setConnection(?\PDO $pdo): void
+    {
+        self::$pdo = $pdo;
+    }
+
+    /**
      * Run a prepared statement and return all rows.
      *
      * @param string              $sql

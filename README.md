@@ -197,6 +197,38 @@ Con tu Apache, MySQL, Ollama y el servidor de voz en ejecución, abre tu navegad
 
 ---
 
+## 🧪 Ejecutar las pruebas
+
+El proyecto trae una suite propia, sin dependencias externas:
+
+```bash
+php tests/run.php
+```
+
+Devuelve `0` si todo pasa y `1` si algo falla, así que sirve tal cual en un hook de
+pre-commit o en integración continua. También acepta un filtro:
+
+```bash
+php tests/run.php Unit          # solo un directorio
+php tests/run.php RutasTest     # solo una clase
+```
+
+Las pruebas de integración necesitan un servidor MySQL. Si no lo encuentran **se omiten
+en lugar de fallar**, de modo que la suite corre en cualquier máquina:
+
+```bash
+TEST_DB_PORT=3306 TEST_DB_USER=root TEST_DB_PASS= php tests/run.php
+```
+
+Crean y destruyen su propia base `sgpd_pruebas`; nunca tocan `sistema_sena`. Los datos
+de prueba salen de `docs/Reporte_Juicios_Evaluativos_MUESTRA.xlsx`, un reporte con la
+estructura real de Sofía Plus pero con aprendices e instructores ficticios.
+
+El detalle de los 54 casos está en
+[docs/16_PLAN_PRUEBAS.md](docs/16_PLAN_PRUEBAS.md).
+
+---
+
 ## 📚 Documentación Técnica y Manuales Avanzados
 
 Si eres evaluador, instructor o desarrollador y deseas profundizar en cada aspecto técnico, matemático o arquitectónico del proyecto, consulta nuestra documentación integral dentro de la carpeta [`docs/`](file:///c:/Users/crist/OneDrive/Documentos/Trabajos_github/SENA_SGPD/docs):

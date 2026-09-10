@@ -37,7 +37,21 @@ final class Router
             'action'     => $action,
             'pattern'    => $pattern,
             'method'     => $method,
+            'uri'        => $uri,
         ];
+    }
+
+    /**
+     * Todas las rutas registradas.
+     *
+     * Permite verificar sin despachar una petición que cada ruta apunta a un
+     * controlador y a una acción que existen (ver docs/16, caso CP-51).
+     *
+     * @return array<string, array{controller: string, action: string, pattern: string, method: string, uri: string}>
+     */
+    public function getRoutes(): array
+    {
+        return $this->routes;
     }
 
     /**

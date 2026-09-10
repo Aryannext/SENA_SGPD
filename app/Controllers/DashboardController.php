@@ -249,19 +249,9 @@ final class DashboardController extends Controller
         $pctGlobal  = $totalCalif > 0 ? round($totalAprobados * 100.0 / $totalCalif, 1) : 0;
 
         // Nuevos cálculos para Insights (Rendimiento Relativo al PROMEDIO DE LA CLASE)
-        $enRiesgo = 0;
-        $destacados = 0;
-        $histograma = [
-            self::CAT_CRITICO    => 0,
-            self::CAT_REZAGADO   => 0,
-            self::CAT_AL_DIA     => 0,
-            self::CAT_ADELANTADO => 0,
-        ];
-
-        // Lista rápida de aprendices en riesgo (Foco de atención)
-        $topRiesgo = [];
-
-        // Hacemos el insight SOLO SOBRE LA LISTA COMPLETA DE APRENDICES ACTIVOS (para que el filtro no dañe la gráfica)
+        // El insight se calcula sobre TODOS los aprendices activos de la ficha, no
+        // sobre la tabla filtrada: así los filtros de la interfaz no deforman las
+        // gráficas ni el conteo de aprendices en riesgo.
         $avanceParaInsights = $db::run("
             SELECT a.id_aprendiz, a.nombre, a.apellido, a.nu_documento, a.estado,
                    COALESCE(ROUND(SUM(CASE WHEN c.jui_evaluativo = 'APROBADO' THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(c.id_calificacion), 0), 1), 0) as porcentaje_avance,
@@ -282,51 +272,9 @@ final class DashboardController extends Controller
             $whereGlobal
             GROUP BY a.id_aprendiz
         ", $paramsGlobal);
-
-        // Usar $avgProgress como la meta (en lugar del tiempo, porque el Excel puede ser viejo)
-        $expectedBaseline = $avgProgress;
-
-        foreach ($avanceParaInsights as &$ap) {
-            $pct = (float)$ap['porcentaje_avance'];
-            $enDeuda = (int)$ap['en_deuda'];
-            
-            // Lógica de Categorización Relativa al Grupo
-            $dif = $pct - $expectedBaseline;
-            
-            if ($dif < -15 || $enDeuda >= 5) {
-                $cat = self::CAT_CRITICO;
-                $enRiesgo++;
-            } elseif ($dif < -5 || $enDeuda >= 2) {
-                $cat = self::CAT_REZAGADO;
-            } elseif ($dif <= 5) {
-                $cat = self::CAT_AL_DIA;
-            } else {
-                $cat = self::CAT_ADELANTADO;
-                $destacados++;
-            }
-            
-            $ap['categoria'] = $cat;
-            $histograma[$cat]++;
-
-            // Foco de Atención: Todos aquí ya son 'EN FORMACION'
-            $scoreRiesgo = $dif - ($enDeuda * 5); 
-            $ap['score_riesgo'] = $scoreRiesgo;
-            $topRiesgo[] = $ap;
-        }
-
-        // Ordenar topRiesgo de menor score a mayor
-        usort($topRiesgo, function($a, $b) {
-            return $a['score_riesgo'] <=> $b['score_riesgo'];
-        });
-        
-        // Foco de Atención: solo las categorías que requieren intervención,
-        // ordenadas por score de riesgo ascendente (el peor primero).
-        $soloRiesgo = array_filter(
-            $topRiesgo,
-            static fn(array $a): bool => in_array($a['categoria'], self::CATS_EN_RIESGO, true)
-        );
-        usort($soloRiesgo, static fn(array $a, array $b): int => $a['score_riesgo'] <=> $b['score_riesgo']);
-        $topRiesgo = array_values($soloRiesgo);
+        // Usar el promedio real del grupo como línea base (RN-17): el Excel puede
+        // ser antiguo, así que el tiempo cronológico no sirve como meta.
+        $insights = self::construirInsights($avanceParaInsights, $avgProgress);
 
         $this->json([
             'tiempo_transcurrido'   => $tiempoTranscurrido,
@@ -342,15 +290,74 @@ final class DashboardController extends Controller
             'avance_por_competencia' => $avancePorComp,
             'pendientes_por_estado' => $pendientesPorEstado,
             'fases'                 => $fasesStats,
-            'insights' => [
-                'en_riesgo' => $enRiesgo,
-                'destacados' => $destacados,
-                'histograma' => $histograma,
-                'top_riesgo' => $topRiesgo
-            ]
+            'insights' => $insights,
         ]);
     }
 
+    /**
+     * Clasifica a los aprendices por su rendimiento relativo al promedio del grupo
+     * y arma el panel «Foco de Atención».
+     *
+     * Reglas de negocio aplicadas (docs/13_REGLAS_NEGOCIO.md):
+     *   RN-16  «en deuda» = resultado pendiente que el grupo ya aprobó
+     *   RN-17  la categoría es relativa al promedio de la ficha, no a un umbral fijo
+     *
+     * Es un método puro: no consulta la base de datos ni emite salida, de modo que
+     * puede verificarse con datos sintéticos (docs/16_PLAN_PRUEBAS.md, caso CP-13).
+     *
+     * @param array<int, array<string, mixed>> $aprendices Con 'porcentaje_avance' y 'en_deuda'
+     * @param float $baseline Promedio de avance del grupo, en porcentaje
+     * @return array{en_riesgo: int, destacados: int, histograma: array<string, int>, top_riesgo: array<int, array<string, mixed>>}
+     */
+    public static function construirInsights(array $aprendices, float $baseline): array
+    {
+        $enRiesgo   = 0;
+        $destacados = 0;
+        $histograma = [
+            self::CAT_CRITICO    => 0,
+            self::CAT_REZAGADO   => 0,
+            self::CAT_AL_DIA     => 0,
+            self::CAT_ADELANTADO => 0,
+        ];
+        $clasificados = [];
+
+        foreach ($aprendices as $ap) {
+            $pct     = (float) ($ap['porcentaje_avance'] ?? 0);
+            $enDeuda = (int) ($ap['en_deuda'] ?? 0);
+            $dif     = $pct - $baseline;
+
+            if ($dif < -15 || $enDeuda >= 5) {
+                $cat = self::CAT_CRITICO;
+                $enRiesgo++;
+            } elseif ($dif < -5 || $enDeuda >= 2) {
+                $cat = self::CAT_REZAGADO;
+            } elseif ($dif <= 5) {
+                $cat = self::CAT_AL_DIA;
+            } else {
+                $cat = self::CAT_ADELANTADO;
+                $destacados++;
+            }
+
+            $ap['categoria']    = $cat;
+            $ap['score_riesgo'] = $dif - ($enDeuda * 5);
+            $histograma[$cat]++;
+            $clasificados[] = $ap;
+        }
+
+        // Foco de Atención: solo quienes requieren intervención, el peor primero.
+        $topRiesgo = array_values(array_filter(
+            $clasificados,
+            static fn(array $a): bool => in_array($a['categoria'], self::CATS_EN_RIESGO, true)
+        ));
+        usort($topRiesgo, static fn(array $a, array $b): int => $a['score_riesgo'] <=> $b['score_riesgo']);
+
+        return [
+            'en_riesgo'  => $enRiesgo,
+            'destacados' => $destacados,
+            'histograma' => $histograma,
+            'top_riesgo' => $topRiesgo,
+        ];
+    }
     public function filtrar(): void
     {
         $idFicha     = isset($_GET['id_ficha']) ? (int)$_GET['id_ficha'] : 0;

@@ -2,24 +2,53 @@
 
 ## 16.1 Alcance y estrategia
 
-El proyecto **no tiene hoy ninguna prueba automatizada** (RNF-24). Este documento define
-qué hay que probar y cómo, derivándolo de los criterios de aceptación de
-[14_HISTORIAS_USUARIO.md](14_HISTORIAS_USUARIO.md).
+Este documento define qué hay que probar y cómo, derivándolo de los criterios de
+aceptación de [14_HISTORIAS_USUARIO.md](14_HISTORIAS_USUARIO.md).
 
-Los casos marcados como **ejecutados** se corrieron manualmente durante la auditoría del
-9 de septiembre de 2026, contra una instancia real. El resto está especificado pero
-todavía no se ha ejecutado.
+Estados de cada caso:
+
+| Marca | Significado |
+|---|---|
+| ✅ **automatizado** | Vive en `tests/` y se ejecuta con un comando |
+| ✅ ejecutado | Comprobado a mano en la auditoría, aún sin automatizar |
+| ❌ falla | Comprobado y con defecto asociado |
+| ⏳ pendiente | Especificado, sin ejecutar |
 
 ### Niveles
 
-| Nivel | Qué cubre | Herramienta propuesta |
+| Nivel | Qué cubre | Estado |
 |---|---|---|
-| **Unitario** | Funciones puras: parseo, normalización, cálculo | PHPUnit |
-| **Integración** | Servicios contra una base de datos de prueba | PHPUnit + MySQL efímero |
-| **Contrato** | Que cada ruta registrada apunte a un método existente | PHPUnit |
-| **Sistema (API)** | Endpoints HTTP de extremo a extremo | PHPUnit + cliente HTTP |
-| **Interfaz** | Render y comportamiento en navegador | Manual, o Playwright a futuro |
-| **Seguridad** | Escapado, autorización, exposición de archivos | Manual + casos de regresión |
+| **Unitario** | Funciones puras: parseo, normalización, categorización | ✅ implementado |
+| **Contrato** | Que cada ruta registrada apunte a un método existente | ✅ implementado |
+| **Integración** | Servicios contra una base de datos desechable | ✅ implementado |
+| **Regresión de seguridad** | Escapado de la salida | ✅ implementado |
+| **Sistema (API)** | Endpoints HTTP de extremo a extremo | ⏳ pendiente |
+| **Interfaz** | Render y comportamiento en navegador | ⏳ manual |
+
+### Cómo ejecutar la suite
+
+```bash
+php tests/run.php                # toda la suite
+php tests/run.php Unit           # solo un directorio
+php tests/run.php RutasTest      # solo una clase
+```
+
+Devuelve código de salida `0` si todo pasa y `1` si algo falla, así que sirve tal cual
+en un hook de pre-commit o en integración continua.
+
+Las pruebas de integración necesitan un servidor MySQL. Si no lo encuentran, **se omiten
+en lugar de fallar**, de modo que la suite corre en cualquier máquina:
+
+```bash
+TEST_DB_HOST=127.0.0.1 TEST_DB_PORT=3306 TEST_DB_USER=root TEST_DB_PASS= php tests/run.php
+```
+
+Crean y destruyen su propia base `sgpd_pruebas`; **nunca tocan `sistema_sena`**.
+
+> **Por qué un ejecutor propio y no PHPUnit.** El proyecto se construyó sin frameworks y
+> la máquina de desarrollo no tiene Composer instalado. `tests/TestCase.php` usa los
+> mismos nombres de aserción que PHPUnit a propósito: cuando se pueda instalar, migrar
+> consiste en extender `PHPUnit\Framework\TestCase` y borrar ese archivo.
 
 ### Entorno de pruebas
 
@@ -60,12 +89,12 @@ de muestra:
 
 | Caso | Objetivo | Resultado esperado | Estado |
 |---|---|---|---|
-| **CP-01** | Subir un `.xlsx` válido | HTTP 200, `success: true` | ✅ ejecutado |
+| **CP-01** | Subir un `.xlsx` válido | HTTP 200, `success: true` | ✅ ejecutado — falta a nivel HTTP |
 | **CP-02** | Subir un archivo con extensión no permitida | HTTP 400, base de datos sin cambios | ⏳ pendiente |
-| **CP-03** | Metadatos de ficha y programa | `nu_ficha=3142784`, `codigo_programa=228118`, fechas `2025-02-10` / `2027-05-10`, modalidad `PRESENCIAL` | ✅ ejecutado |
+| **CP-03** | Metadatos de ficha y programa | `nu_ficha=3142784`, `codigo_programa=228118`, fechas `2025-02-10` / `2027-05-10`, modalidad `PRESENCIAL` | ✅ **automatizado** |
 | **CP-04** | Detección de columnas por encabezado | Intercambiar dos columnas produce los mismos registros | ⏳ pendiente |
-| **CP-05** | Conteos tras la importación | Coinciden con los valores de referencia, 0 errores | ✅ ejecutado |
-| **CP-06** | Idempotencia | Reimportar no altera ningún conteo | ✅ ejecutado |
+| **CP-05** | Conteos tras la importación | Coinciden con los valores de referencia, 0 errores | ✅ **automatizado** |
+| **CP-06** | Idempotencia | Reimportar no altera ningún conteo | ✅ **automatizado** |
 | **CP-07** | Resumen distingue nuevos de actualizados | Reimportar informa 0 nuevos | ❌ **falla** — defecto F-11 |
 
 ### CP-05 · Detalle
@@ -85,10 +114,10 @@ real, 14,0 s con el de muestra.
 |---|---|---|---|
 | **CP-08** | Selector de ficha | Cambiar de ficha recalcula todo el tablero | ✅ ejecutado |
 | **CP-09** | Cálculo del avance global | `aprobados ÷ (aprobados + por evaluar) × 100`, un decimal | ✅ ejecutado |
-| **CP-10** | Histograma completo | Las 4 categorías suman el total de activos | ✅ ejecutado |
+| **CP-10** | Histograma completo | Las 4 categorías suman el total de activos | ✅ **automatizado** |
 | **CP-11** | Cumplimiento por fases | Solo fases con resultados vinculados | ✅ ejecutado |
 | **CP-12** | Competencias críticas | 5 competencias, orden ascendente | ⏳ pendiente |
-| **CP-13** | **Regresión F-01:** foco de atención | Todo aprendiz Crítico aparece en la lista | ✅ ejecutado |
+| **CP-13** | **Regresión F-01:** foco de atención | Todo aprendiz Crítico aparece en la lista | ✅ **automatizado** |
 | **CP-14** | Directorio de aprendices | Una fila por aprendiz de la ficha, con avance | ✅ ejecutado |
 | **CP-15** | Filtros combinados | Los 5 filtros del enunciado, acumulativos | ❌ **falla** — faltan 2 filtros (F-08) |
 
@@ -172,7 +201,7 @@ filtrado.
 | **CP-33** | Transmisión SSE | Los tokens llegan progresivamente | ⏳ pendiente |
 | **CP-34** | Gráfica generada | Pedir «gráfica» produce una acción `[CHART:…]` válida | ⏳ pendiente |
 | **CP-35** | Reporte CSV | El CSV descargado tiene encabezados y filas correctas | ⏳ pendiente |
-| **CP-36** | **Regresión F-03:** ruta de voz | `POST /api/chat/synthesize` responde HTTP 200 | ✅ ejecutado |
+| **CP-36** | **Regresión F-03:** ruta de voz | `POST /api/chat/synthesize` responde HTTP 200 | ✅ **automatizado** |
 | **CP-37** | Degradación sin servicios | Con Ollama y TTS apagados, el sistema sigue operativo | ✅ ejecutado |
 
 ### CP-36 · Detalle — prueba de contrato
@@ -197,10 +226,11 @@ estando el microservicio apagado.
 | **CP-44** | RN-07 | Código de competencia o resultado duplicado es rechazado | ⏳ pendiente |
 | **CP-45** | RN-08 | Una competencia se asocia a varios programas sin duplicar | ⏳ pendiente |
 | **CP-46** | RN-10 | Borrar aprendiz elimina sus juicios en cascada | ⏳ pendiente |
-| **CP-47** | RN-12 | Un juicio desconocido se normaliza a `POR EVALUAR` | ⏳ pendiente |
-| **CP-48** | RN-13 | Un juicio `POR EVALUAR` admite fecha y funcionario nulos | ✅ ejecutado |
-| **CP-49** | RN-15 | Los KPIs excluyen a retirados y trasladados | ✅ ejecutado — KPI 24 frente a 31 en el directorio |
+| **CP-47** | RN-12 | Un juicio desconocido se normaliza a `POR EVALUAR` | ✅ **automatizado** |
+| **CP-48** | RN-13 | Un juicio `POR EVALUAR` admite fecha y funcionario nulos | ✅ **automatizado** |
+| **CP-49** | RN-15 | Los KPIs excluyen a retirados y trasladados | ✅ ejecutado — KPI 24 frente a 31 |
 | **CP-50** | RN-19 | Recargar el PDF reemplaza la estructura previa | ⏳ pendiente |
+| **CP-54** | RN-12 · **regresión F-12** | `NO APROBADO` no se almacena como `APROBADO` | ✅ **automatizado** |
 
 ---
 
@@ -220,8 +250,10 @@ foreach ($router->getRoutes() as $ruta) {
 
 > Requiere exponer un `getRoutes()` en `Core\Router`, hoy inexistente.
 
-**Estado:** ⏳ pendiente. Verificado manualmente: 15 rutas web y 11 endpoints responden
-HTTP 200.
+**Estado:** ✅ **automatizado** en `tests/Contract/RutasTest.php`. Cubre las 36 rutas y
+añade tres comprobaciones más: que cada acción sea pública, que las rutas con
+parámetros tengan acciones que los acepten, y que toda ruta invocada desde
+`public/js` exista en el router.
 
 ### CP-52 · Regresión V-01 · escapado de la salida
 **Precondición:** importar un reporte cuyo campo *Nombre* contenga
@@ -234,7 +266,9 @@ HTTP 200.
 
 **Resultado antes de la corrección:** ❌ el payload creaba un `<img>` vivo en el DOM.
 **Resultado tras `5d27772`:** ✅ 0 elementos `<img>`; el nombre aparece como texto inerte.
-**Estado:** ✅ ejecutado — debe automatizarse como regresión permanente.
+**Estado:** ✅ **automatizado** en `tests/Regression/EscapadoTest.php`. Verifica el
+escapado en servidor renderizando las plantillas, y vigila que no reaparezca ninguno
+de los 14 patrones de interpolación sin escapar que se corrigieron.
 
 ### CP-53 · Cabeceras de seguridad
 **Resultado esperado:** las respuestas incluyen `Content-Security-Policy`,
@@ -246,27 +280,44 @@ lleva `HttpOnly` y `SameSite`.
 
 ## 16.10 Estado de la suite
 
-| Resultado | Casos | Comentario |
-|---|--:|---|
-| ✅ Pasa | 24 | Ejecutados manualmente en la auditoría |
-| ❌ Falla | 10 | Cada uno con defecto o vulnerabilidad asociada |
-| ⏳ Pendiente | 19 | Especificados, sin ejecutar |
-| **Total** | **53** | **0 automatizados** |
+| Resultado | Casos |
+|---|--:|
+| ✅ **Automatizado** | 11 |
+| ✅ Pasa, ejecutado a mano | 16 |
+| ❌ Falla | 10 |
+| ⏳ Pendiente | 17 |
+| **Total** | **54** |
 
-### Por dónde empezar a automatizar
+### Lo que hay automatizado
 
-El orden no es por número de caso sino por relación entre valor y esfuerzo:
+`php tests/run.php` — **43 pruebas, 559 aserciones, 55 s.**
 
-1. **CP-51 · contrato de rutas.** Una sola prueba cubre las 32 rutas y habría detectado
-   F-03 el día que se introdujo. Es la de mejor relación valor/esfuerzo del proyecto.
-2. **CP-13 y CP-52 · regresiones de F-01 y V-01.** Ambos defectos llegaron a producción;
-   sin prueba, pueden volver.
-3. **CP-05 y CP-06 · importación e idempotencia.** Protegen el corazón del sistema con
-   dos aserciones de conteos.
-4. **Unitarias del importador.** `parseCodigoNombre`, `parseFuncionario`,
-   `normalizeJuicio`, `normalizeEstadoFicha`, `normalizeModalidad` y `parseExcelDate` son
-   deterministas y no necesitan base de datos: son las más baratas de escribir.
-5. **El resto de reglas de negocio**, a medida que se toquen las áreas correspondientes.
+| Archivo | Cubre | Pruebas |
+|---|---|--:|
+| `tests/Contract/RutasTest.php` | CP-36, CP-51 | 6 |
+| `tests/Unit/ImportadorTest.php` | CP-47, CP-48, CP-54 | 14 |
+| `tests/Unit/InsightsTest.php` | CP-10, CP-13 | 8 |
+| `tests/Integration/ImportacionTest.php` | CP-03, CP-05, CP-06 | 7 |
+| `tests/Regression/EscapadoTest.php` | CP-52 | 8 |
+
+Los tres defectos ya corregidos tienen su prueba de regresión: **F-01** en
+`InsightsTest`, **F-03** en `RutasTest` y **V-01** en `EscapadoTest`. **F-12** se
+descubrió al escribir `ImportadorTest` y quedó cubierto por CP-54.
+
+### Lo que falta por automatizar
+
+1. **Nivel HTTP (CP-01, CP-02, CP-21, CP-38).** La suite llama a los servicios
+   directamente; falta un cliente que ejerza los endpoints reales, con sus códigos de
+   estado y su validación de entrada.
+2. **Consultas analíticas (CP-09, CP-11, CP-12, CP-49).** Requieren datos en base y
+   comparar contra cifras conocidas; la infraestructura ya existe en
+   `ImportacionTest`.
+3. **Proyecto formativo (CP-22 … CP-26, CP-50).** El parser de PDF es determinista y el
+   archivo de prueba está en `docs/`: son automatizables tal cual.
+4. **Reglas de negocio del esquema (CP-39 … CP-46).** Cada una es un `INSERT` que debe
+   fallar; rápidas de escribir sobre la base desechable.
+5. **Interfaz.** Solo con un navegador automatizado. Es lo último por costo/beneficio,
+   salvo la parte de escapado, que ya está cubierta de forma estática.
 
 ### Los diez casos que fallan
 

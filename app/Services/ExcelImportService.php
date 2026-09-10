@@ -261,10 +261,14 @@ final class ExcelImportService
     private function normalizeJuicio(string $juicio): string
     {
         $juicio = mb_strtoupper(trim($juicio));
+
+        // El orden importa: 'NO APROBADO' contiene 'APROB', así que la rama
+        // negativa debe evaluarse primero. Al revés, todo juicio reprobado se
+        // almacenaba como aprobado (defecto F-12).
         return match (true) {
-            $juicio === 'A' || str_contains($juicio, 'APROB')  => 'APROBADO',
             $juicio === 'D' || str_contains($juicio, 'NO APR') => 'NO APROBADO',
-            default                          => 'POR EVALUAR',
+            $juicio === 'A' || str_contains($juicio, 'APROB')  => 'APROBADO',
+            default                                            => 'POR EVALUAR',
         };
     }
 
