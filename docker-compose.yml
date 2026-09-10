@@ -21,8 +21,11 @@ services:
       db:
         condition: service_healthy
     environment:
-      # Vacío: la aplicación ocupa la raíz del dominio.
-      APP_BASE_PATH: ""
+      # Subdirectorio en el que vive, SIN barra final. Vacío = raíz del
+      # dominio o subdominio. Se pasa por variable porque el mismo compose
+      # sirve para los dos casos: en proyectosena.online la aplicación vive en
+      # /sgpd, junto a otros proyectos del mismo dominio.
+      APP_BASE_PATH: ${APP_BASE_PATH:-}
       APP_STORAGE_PATH: /var/www/html/storage
       APP_MAX_UPLOAD_MB: "20"
       APP_DEBUG: "false"
@@ -37,14 +40,18 @@ services:
       # Los archivos importados y el audio sobreviven a los despliegues.
       - sgpd_storage:/var/www/html/storage
     ports:
-      # Solo para pruebas locales. Configurable porque el 8080 suele estar
-      # ocupado cuando hay varios proyectos en la misma máquina: define APP_PORT
-      # en tu .env si te choca.
+      # La interfaz de escucha va DELANTE del puerto, y por defecto es
+      # 127.0.0.1. No es un detalle: sin ella Docker publica en 0.0.0.0 y
+      # escribe sus propias reglas en iptables, por delante del cortafuegos del
+      # servidor. El contenedor quedaría accesible desde internet aunque ufw
+      # diga que ese puerto está cerrado.
       #
-      # En Dokploy, quita esta sección y asigna el dominio desde el panel:
-      # Traefik enruta al contenedor por la red interna, y publicar el puerto lo
-      # dejaría expuesto además de poder chocar con tus otros proyectos.
-      - "${APP_PORT:-8080}:80"
+      # Detrás de un Nginx o un Traefik que hace de proxy, solo ese proxy
+      # necesita alcanzarlo. Para pruebas locales 127.0.0.1 sirve igual.
+      #
+      # APP_PORT es configurable porque el 8080 suele estar ocupado cuando hay
+      # varios proyectos en la misma máquina.
+      - "${APP_BIND:-127.0.0.1}:${APP_PORT:-8080}:80"
     healthcheck:
       test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1/salud') !== false ? 0 : 1);"]
       interval: 30s
