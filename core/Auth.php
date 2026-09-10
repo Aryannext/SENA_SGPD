@@ -45,9 +45,22 @@ final class Auth
         $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
             || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
 
+        // La cookie se limita al subdirectorio en el que vive la aplicacion.
+        //
+        // Importa cuando el despliegue comparte dominio con otros proyectos,
+        // que es el caso de proyectosena.online: con 'path' en '/', el
+        // navegador enviaria la cookie de sesion del SGPD tambien al
+        // portafolio, al sistema juridico y a costura, que no tienen nada que
+        // hacer con ella.
+        //
+        // Sin barra final a proposito: '/sgpd' cubre '/sgpd' y '/sgpd/...',
+        // mientras que '/sgpd/' dejaria fuera la primera. Si APP_BASE_PATH
+        // esta vacio —la aplicacion en la raiz de un dominio— vuelve a ser '/'.
+        $rutaCookie = App::basePath() ?: '/';
+
         session_set_cookie_params([
             'lifetime' => 0,
-            'path'     => '/',
+            'path'     => $rutaCookie,
             'httponly' => true,
             'samesite' => 'Strict',
             'secure'   => $https,
