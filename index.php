@@ -62,7 +62,7 @@ $router->post('/api/programa/delete-ficha', 'App\Controllers\ProgramaController'
 
 // API routes — AI Chat
 $router->post('/api/chat/send',         'App\Controllers\AIController',        'send');
-$router->post('/api/chat/speak',        'App\Controllers\AIController',        'speak');
+$router->post('/api/chat/synthesize',   'App\Controllers\AIController',        'synthesize');
 $router->post('/api/chat/clear',        'App\Controllers\AIController',        'clear');
 
 // Web routes — Deserción

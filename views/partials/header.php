@@ -4,7 +4,7 @@
             <i class="fas fa-bars"></i>
         </button>
         <div class="breadcrumb">
-            <i class="fas fa-home"></i> / <span><?= $pageTitle ?? 'Dashboard' ?></span>
+            <i class="fas fa-home"></i> / <span><?= htmlspecialchars($pageTitle ?? 'Dashboard', ENT_QUOTES, 'UTF-8') ?></span>
         </div>
     </div>
     <div style="display:flex;align-items:center;gap:12px;">

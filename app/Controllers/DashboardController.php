@@ -12,6 +12,15 @@ use App\Models\Fase;
 
 final class DashboardController extends Controller
 {
+    /** Categorías de rendimiento, relativas al promedio del grupo (RN-09). */
+    private const CAT_CRITICO    = 'Crítico';
+    private const CAT_REZAGADO   = 'Rezagado';
+    private const CAT_AL_DIA     = 'Al Día';
+    private const CAT_ADELANTADO = 'Adelantado';
+
+    /** Categorías que el panel «Foco de Atención» debe listar. */
+    private const CATS_EN_RIESGO = [self::CAT_CRITICO, self::CAT_REZAGADO];
+
     public function index(): void
     {
         $this->view('dashboard.index', [
@@ -243,10 +252,10 @@ final class DashboardController extends Controller
         $enRiesgo = 0;
         $destacados = 0;
         $histograma = [
-            'Crítico' => 0,
-            'Rezagado' => 0,
-            'Al Día' => 0,
-            'Adelantado' => 0
+            self::CAT_CRITICO    => 0,
+            self::CAT_REZAGADO   => 0,
+            self::CAT_AL_DIA     => 0,
+            self::CAT_ADELANTADO => 0,
         ];
 
         // Lista rápida de aprendices en riesgo (Foco de atención)
@@ -285,14 +294,14 @@ final class DashboardController extends Controller
             $dif = $pct - $expectedBaseline;
             
             if ($dif < -15 || $enDeuda >= 5) {
-                $cat = 'Crítico';
+                $cat = self::CAT_CRITICO;
                 $enRiesgo++;
             } elseif ($dif < -5 || $enDeuda >= 2) {
-                $cat = 'Rezagado';
+                $cat = self::CAT_REZAGADO;
             } elseif ($dif <= 5) {
-                $cat = 'Al Día';
+                $cat = self::CAT_AL_DIA;
             } else {
-                $cat = 'Adelantado';
+                $cat = self::CAT_ADELANTADO;
                 $destacados++;
             }
             
@@ -310,7 +319,14 @@ final class DashboardController extends Controller
             return $a['score_riesgo'] <=> $b['score_riesgo'];
         });
         
-        $soloRiesgo = array_filter($topRiesgo, function($a) { return in_array($a["categoria"], ["Cr�tico", "Rezagado"]); }); usort($soloRiesgo, function($a, $b) { return $a["score_riesgo"] <=> $b["score_riesgo"]; }); $topRiesgo = array_values($soloRiesgo);
+        // Foco de Atención: solo las categorías que requieren intervención,
+        // ordenadas por score de riesgo ascendente (el peor primero).
+        $soloRiesgo = array_filter(
+            $topRiesgo,
+            static fn(array $a): bool => in_array($a['categoria'], self::CATS_EN_RIESGO, true)
+        );
+        usort($soloRiesgo, static fn(array $a, array $b): int => $a['score_riesgo'] <=> $b['score_riesgo']);
+        $topRiesgo = array_values($soloRiesgo);
 
         $this->json([
             'tiempo_transcurrido'   => $tiempoTranscurrido,

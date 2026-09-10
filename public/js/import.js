@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="card" style="border-color:var(--danger);">
                     <div class="card-header"><span class="card-title" style="color:var(--danger);"><i class="fas fa-exclamation-triangle"></i> Errores</span></div>
                     <div style="max-height:200px;overflow-y:auto;font-size:12px;color:var(--text-muted);">
-                        ${data.errors.map(e => `<div style="padding:4px 0;border-bottom:1px solid var(--border);">${e}</div>`).join('')}
+                        ${data.errors.map(e => `<div style="padding:4px 0;border-bottom:1px solid var(--border);">${APP.esc(e)}</div>`).join('')}
                     </div>
                 </div>
             `;

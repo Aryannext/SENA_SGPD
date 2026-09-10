@@ -343,14 +343,14 @@ const Dashboard = {
                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.02);">
                     <td style="padding: 10px 8px;">
                         <div style="font-weight:600;font-size:12px;color:var(--text-bright);">
-                            <a href="${APP.basePath}/aprendiz/${a.id_aprendiz}" style="color:inherit;text-decoration:none;">${a.nombre} ${a.apellido}</a>
+                            <a href="${APP.basePath}/aprendiz/${a.id_aprendiz}" style="color:inherit;text-decoration:none;">${APP.esc(a.nombre)} ${APP.esc(a.apellido)}</a>
                         </div>
-                        <div style="font-size:10px;color:var(--text-muted);">${a.nu_documento}</div>
+                        <div style="font-size:10px;color:var(--text-muted);">${APP.esc(a.nu_documento)}</div>
                     </td>
                     <td style="text-align:right; font-weight:700; color:${color}; font-size:13px; padding: 10px 8px;">
                         ${pct}%<br>
                         ${a.en_deuda > 0 
-                            ? `<a href="#" onclick="Dashboard.verDeudas(${a.id_aprendiz}, '${a.nombre.replace(/'/g,"\\'")} ${a.apellido.replace(/'/g,"\\'")}'); return false;" style="font-size:10px; color:var(--danger); text-decoration:underline;">Debe ${a.en_deuda} res.</a>` 
+                            ? `<a href="#" data-nombre="${APP.esc(a.nombre + ' ' + a.apellido)}" onclick="Dashboard.verDeudas(${a.id_aprendiz}, this.dataset.nombre); return false;" style="font-size:10px; color:var(--danger); text-decoration:underline;">Debe ${a.en_deuda} res.</a>` 
                             : `<span style="font-size:10px; color:var(--text-muted); font-weight:normal;">Al día</span>`
                         }
                     </td>
@@ -378,9 +378,9 @@ const Dashboard = {
             const badgeClass = a.estado.includes('FORMACION') ? 'badge-success' :
                                a.estado.includes('RETIRO') ? 'badge-danger' : 'badge-warning';
             return `<tr>
-                <td><code>${a.nu_documento}</code></td>
-                <td><a href="${APP.basePath}/aprendiz/${a.id_aprendiz}">${a.nombre} ${a.apellido}</a></td>
-                <td><span class="badge ${badgeClass}">${a.estado}</span></td>
+                <td><code>${APP.esc(a.nu_documento)}</code></td>
+                <td><a href="${APP.basePath}/aprendiz/${a.id_aprendiz}">${APP.esc(a.nombre)} ${APP.esc(a.apellido)}</a></td>
+                <td><span class="badge ${badgeClass}">${APP.esc(a.estado)}</span></td>
                 <td style="color:var(--accent);font-weight:600;">${a.aprobados}</td>
                 <td style="color:var(--warning);font-weight:600;">${a.por_evaluar}</td>
                 <td style="font-weight:700;">${pct}%</td>
@@ -503,10 +503,10 @@ const Dashboard = {
                         ${deudas.map(d => `
                             <li style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); padding:12px; border-radius:6px;">
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                                    <div style="font-size:11px; color:var(--accent); font-weight:600; text-transform:uppercase;">${d.competencia}</div>
-                                    ${d.instructor_responsable ? `<div style="font-size:10px; color:var(--text-muted);"><i class="fas fa-user-tie" style="margin-right:4px;"></i>${d.instructor_responsable}</div>` : ''}
+                                    <div style="font-size:11px; color:var(--accent); font-weight:600; text-transform:uppercase;">${APP.esc(d.competencia)}</div>
+                                    ${d.instructor_responsable ? `<div style="font-size:10px; color:var(--text-muted);"><i class="fas fa-user-tie" style="margin-right:4px;"></i>${APP.esc(d.instructor_responsable)}</div>` : ''}
                                 </div>
-                                <div style="font-size:13px; color:var(--text-bright); line-height:1.4;">${d.resultado}</div>
+                                <div style="font-size:13px; color:var(--text-bright); line-height:1.4;">${APP.esc(d.resultado)}</div>
                             </li>
                         `).join('')}
                     </ul>
@@ -519,7 +519,7 @@ const Dashboard = {
                     <button onclick="this.closest('div').parentElement.parentElement.remove()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; padding:4px;"><i class="fas fa-times"></i></button>
                 </div>
                 <div style="padding:0 20px 16px 20px; font-size:13px; color:var(--text-muted);">
-                    Mostrando resultados evaluados en la ficha donde <strong>${nombre}</strong> se encuentra POR EVALUAR.
+                    Mostrando resultados evaluados en la ficha donde <strong>${APP.esc(nombre)}</strong> se encuentra POR EVALUAR.
                 </div>
                 ${listHtml}
             `;

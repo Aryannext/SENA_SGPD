@@ -81,12 +81,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                         </div>
                         <div>
                             <div style="font-size:16px;font-weight:700;color:var(--text-bright);">
-                                Ficha ${ficha.nu_ficha || 'N/A'}
+                                Ficha ${APP.esc(ficha.nu_ficha || 'N/A')}
                             </div>
                             <div style="font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                                <span><i class="fas fa-graduation-cap" style="margin-right:4px;"></i>${ficha.nombre_programa || 'Sin programa'}</span>
-                                ${ficha.codigo_programa ? `<code style="font-size:10px;color:var(--text-muted);background:var(--surface-hover);padding:1px 6px;border-radius:3px;">${ficha.codigo_programa}</code>` : ''}
-                                ${ficha.estado_ficha ? `<span class="badge ${ficha.estado_ficha === 'EN EJECUCION' ? 'badge-success' : ficha.estado_ficha === 'TERMINADA' ? 'badge-info' : 'badge-danger'}" style="font-size:9px;padding:2px 6px;">${ficha.estado_ficha}</span>` : ''}
+                                <span><i class="fas fa-graduation-cap" style="margin-right:4px;"></i>${APP.esc(ficha.nombre_programa || 'Sin programa')}</span>
+                                ${ficha.codigo_programa ? `<code style="font-size:10px;color:var(--text-muted);background:var(--surface-hover);padding:1px 6px;border-radius:3px;">${APP.esc(ficha.codigo_programa)}</code>` : ''}
+                                ${ficha.estado_ficha ? `<span class="badge ${ficha.estado_ficha === 'EN EJECUCION' ? 'badge-success' : ficha.estado_ficha === 'TERMINADA' ? 'badge-info' : 'badge-danger'}" style="font-size:9px;padding:2px 6px;">${APP.esc(ficha.estado_ficha)}</span>` : ''}
                             </div>
                         </div>
                     </div>
@@ -104,10 +104,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                             const color = phaseColors[f.nombre_fase] || '#3b82f6';
                             const barClass = pct >= 70 ? '' : pct >= 40 ? 'warning' : 'danger';
                             return `
-                            <div class="fase-card animate-in" onclick="showFaseDetalle(${f.id_fase}, ${f.id_ficha}, '${f.nombre_fase}')" style="animation-delay:${(fichaIdx * 0.15) + (i * 0.05)}s;padding:14px;cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.3)'" onmouseout="this.style.transform='none';this.style.boxShadow='none'">
+                            <div class="fase-card animate-in" data-fase-nombre="${APP.esc(f.nombre_fase)}" onclick="showFaseDetalle(${f.id_fase}, ${f.id_ficha}, this.dataset.faseNombre)" style="animation-delay:${(fichaIdx * 0.15) + (i * 0.05)}s;padding:14px;cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.3)'" onmouseout="this.style.transform='none';this.style.boxShadow='none'">
                                 <div class="fase-header" style="margin-bottom:8px;">
-                                    <span class="fase-name" style="font-size:13px;">${f.nombre_fase}</span>
-                                    <span class="fase-badge" style="background:${color}20;color:${color};font-size:10px;padding:2px 8px;">${f.nombre_fase}</span>
+                                    <span class="fase-name" style="font-size:13px;">${APP.esc(f.nombre_fase)}</span>
+                                    <span class="fase-badge" style="background:${color}20;color:${color};font-size:10px;padding:2px 8px;">${APP.esc(f.nombre_fase)}</span>
                                 </div>
                                 <div class="progress" style="height:6px;margin-bottom:8px;">
                                     <div class="progress-bar ${barClass}" style="width:${pct}%;background:linear-gradient(90deg,${color},${color}aa);"></div>
@@ -181,9 +181,9 @@ async function showFaseDetalle(idFase, idFicha, nombreFase) {
             
             html += `
             <tr>
-                <td><code>${a.nu_documento}</code></td>
-                <td><a href="${APP.basePath}/aprendiz/${a.id_aprendiz}">${a.nombre} ${a.apellido}</a></td>
-                <td><span class="badge ${badgeClass}">${a.estado}</span></td>
+                <td><code>${APP.esc(a.nu_documento)}</code></td>
+                <td><a href="${APP.basePath}/aprendiz/${a.id_aprendiz}">${APP.esc(a.nombre)} ${APP.esc(a.apellido)}</a></td>
+                <td><span class="badge ${badgeClass}">${APP.esc(a.estado)}</span></td>
                 <td><strong style="color:var(--accent);">${a.aprobados}</strong> / ${a.total_calificaciones}</td>
                 <td style="min-width:120px;">
                     <div style="display:flex;align-items:center;justify-content:space-between;font-size:11px;margin-bottom:2px;">

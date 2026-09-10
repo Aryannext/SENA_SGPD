@@ -7,6 +7,36 @@ const APP = {
     basePath: '/SENA_SGPD',
 
     /**
+     * Escapa una cadena para insertarla en HTML, tanto en texto como dentro de
+     * un atributo entrecomillado. TODO dato proveniente de la base de datos
+     * debe pasar por aquí antes de llegar a innerHTML.
+     * @param {*} value
+     * @returns {string}
+     */
+    esc(value) {
+        if (value === null || value === undefined) return '';
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    },
+
+    /**
+     * Convierte Markdown a HTML saneado. La respuesta del modelo de IA es
+     * contenido no confiable: puede incluir datos de la BD inyectados en el
+     * prompt, así que se sanea siempre antes de renderizar.
+     * @param {string} markdown
+     * @returns {string}
+     */
+    mdSafe(markdown) {
+        if (typeof marked === 'undefined') return this.esc(markdown);
+        const html = marked.parse(markdown);
+        return (typeof DOMPurify !== 'undefined') ? DOMPurify.sanitize(html) : this.esc(markdown);
+    },
+
+    /**
      * Show a toast notification.
      * @param {string} message
      * @param {'success'|'error'|'info'} type
@@ -18,7 +48,7 @@ const APP = {
         const icons = { success: 'fa-check-circle', error: 'fa-times-circle', info: 'fa-info-circle' };
         const toast = document.createElement('div');
         toast.className = `toast toast-${type}`;
-        toast.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i> ${message}`;
+        toast.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i> ${this.esc(message)}`;
         container.appendChild(toast);
         setTimeout(() => {
             toast.style.opacity = '0';

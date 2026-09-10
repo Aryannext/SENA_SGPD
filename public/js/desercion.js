@@ -30,9 +30,9 @@ const Desercion = {
             
             const aiText = document.getElementById('ai-prediction');
             if (data.error) {
-                aiText.innerHTML = `<i class="fas fa-exclamation-circle text-danger"></i> ${data.error}`;
+                aiText.innerHTML = `<i class="fas fa-exclamation-circle text-danger"></i> ${APP.esc(data.error)}`;
             } else {
-                aiText.innerHTML = `<i class="fas fa-magic" style="color:var(--accent);"></i> ${data.prediccion}`;
+                aiText.innerHTML = `<i class="fas fa-magic" style="color:var(--accent);"></i> ${APP.esc(data.prediccion)}`;
             }
         } catch (error) {
             console.error('Error fetching AI prediction:', error);
@@ -121,11 +121,11 @@ const Desercion = {
         tbody.innerHTML = auditoria.map(row => `
             <tr>
                 <td>${new Date(row.fecha).toLocaleDateString()}</td>
-                <td><span class="badge badge-secondary">${row.nu_documento}</span></td>
-                <td style="font-weight: 500;">${row.aprendiz}</td>
-                <td>${row.fase_abandono || 'N/A'}</td>
-                <td><span class="badge badge-warning">${row.motivo || 'No especificado'}</span></td>
-                <td><i class="fas fa-chalkboard-teacher" style="color:var(--text-muted); margin-right:5px;"></i> ${row.instructor_responsable || 'Desconocido'}</td>
+                <td><span class="badge badge-secondary">${APP.esc(row.nu_documento)}</span></td>
+                <td style="font-weight: 500;">${APP.esc(row.aprendiz)}</td>
+                <td>${APP.esc(row.fase_abandono || 'N/A')}</td>
+                <td><span class="badge badge-warning">${APP.esc(row.motivo || 'No especificado')}</span></td>
+                <td><i class="fas fa-chalkboard-teacher" style="color:var(--text-muted); margin-right:5px;"></i> ${APP.esc(row.instructor_responsable || 'Desconocido')}</td>
             </tr>
         `).join('');
     }

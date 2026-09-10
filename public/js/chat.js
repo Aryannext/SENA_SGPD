@@ -80,7 +80,7 @@ const Chat = {
                             fullText += data.token;
                             const cleanText = fullText.replace(/<think>[\s\S]*?<\/think>/g, '');
                             if (typeof marked !== 'undefined') {
-                                contentEl.innerHTML = marked.parse(cleanText);
+                                contentEl.innerHTML = APP.mdSafe(cleanText);
                             } else {
                                 contentEl.textContent = cleanText;
                             }
@@ -99,7 +99,7 @@ const Chat = {
             fullText = this.extractAndRenderSpecialTags(fullText, msgEl);
 
             if (typeof marked !== 'undefined') {
-                contentEl.innerHTML = marked.parse(fullText);
+                contentEl.innerHTML = APP.mdSafe(fullText);
             } else {
                 contentEl.textContent = fullText;
             }
@@ -153,7 +153,7 @@ const Chat = {
                             fullText += data.token;
                             const cleanText = fullText.replace(/<think>[\s\S]*?<\/think>/g, '');
                             if (typeof marked !== 'undefined') {
-                                contentEl.innerHTML = marked.parse(cleanText);
+                                contentEl.innerHTML = APP.mdSafe(cleanText);
                             } else {
                                 contentEl.textContent = cleanText;
                             }
@@ -173,7 +173,7 @@ const Chat = {
             fullText = this.extractAndRenderSpecialTags(fullText, msgEl);
 
             if (typeof marked !== 'undefined') {
-                contentEl.innerHTML = marked.parse(fullText);
+                contentEl.innerHTML = APP.mdSafe(fullText);
             } else {
                 contentEl.textContent = fullText;
             }
@@ -184,7 +184,7 @@ const Chat = {
             speakingDiv.innerHTML = ''; // clear loading state
             
             if (audioRes.audio_url) {
-                speakingDiv.innerHTML = `<audio controls autoplay src="${audioRes.audio_url}"></audio>`;
+                speakingDiv.innerHTML = `<audio controls autoplay src="${APP.esc(audioRes.audio_url)}"></audio>`;
             } else {
                 // Fallback to native browser TTS
                 if ('speechSynthesis' in window) {
@@ -407,7 +407,7 @@ const Chat = {
         const btn = document.createElement('button');
         btn.className = 'btn btn-primary';
         btn.style.cssText = 'margin-top:12px;display:inline-flex;align-items:center;gap:8px;font-size:12px;padding:8px 16px;';
-        btn.innerHTML = `<i class="fas fa-file-excel"></i> Exportar Datos (${reportId})`;
+        btn.innerHTML = `<i class="fas fa-file-excel"></i> Exportar Datos (${APP.esc(reportId)})`;
         btn.onclick = () => {
             APP.toast('Generando reporte ' + reportId + '...', 'info');
             // This is a placeholder for real export logic, usually handled by a backend endpoint or JS table export.

@@ -286,10 +286,10 @@ async function loadAprendices() {
             const barColor = pct >= 70 ? 'var(--accent)' : pct >= 40 ? 'var(--warning)' : 'var(--danger)';
 
             return `<tr>
-                <td>${a.ti_documento}</td>
-                <td><code>${a.nu_documento}</code></td>
-                <td><strong>${a.nombre} ${a.apellido}</strong></td>
-                <td><span class="badge ${badgeClass}">${a.estado}</span></td>
+                <td>${APP.esc(a.ti_documento)}</td>
+                <td><code>${APP.esc(a.nu_documento)}</code></td>
+                <td><strong>${APP.esc(a.nombre)} ${APP.esc(a.apellido)}</strong></td>
+                <td><span class="badge ${badgeClass}">${APP.esc(a.estado)}</span></td>
                 <td>
                     <div class="avance-cell">
                         <div class="avance-bar-mini">
