@@ -63,6 +63,20 @@ foreach ($calificaciones as $cal) {
     </div>
 </div>
 
+<!-- Seguimiento por Resultado de Aprendizaje (enunciado b4) -->
+<div class="card animate-in" style="margin-bottom:24px;">
+    <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
+        <span class="card-title"><i class="fas fa-list-check" style="color:var(--warning);"></i> Seguimiento por Resultado de Aprendizaje</span>
+        <select class="form-control" id="ra-competencia" style="max-width:420px;font-size:12px;">
+            <option value="">Todas las competencias</option>
+        </select>
+    </div>
+    <div style="position:relative;height:420px;overflow-y:auto;">
+        <canvas id="chart-aprendiz-ra"></canvas>
+    </div>
+    <div style="padding:10px 4px 0;font-size:11px;color:var(--text-muted);" id="ra-leyenda"></div>
+</div>
+
 <!-- Resultados agrupados por Competencia -->
 <div class="card animate-in">
     <div class="card-header">
@@ -239,6 +253,111 @@ document.addEventListener('DOMContentLoaded', async () => {
             },
             options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8' } } } }
         });
+        // ── Seguimiento por resultado de aprendizaje (enunciado b4) ─────────
+        const COLOR_ESTADO = {
+            'APROBADO':    '#39d353',
+            'POR EVALUAR': '#f59e0b',
+            'NO APROBADO': '#ef4444',
+        };
+
+        const selectRA  = document.getElementById('ra-competencia');
+        const leyendaRA = document.getElementById('ra-leyenda');
+        const ctxRA     = document.getElementById('chart-aprendiz-ra');
+        let chartRA = null;
+
+        data.por_competencia.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.codigo;
+            opt.textContent = c.codigo + ' - ' + APP.truncate(c.nombre, 60);
+            selectRA.appendChild(opt);
+        });
+
+        /** Altura proporcional al número de barras: 75 resultados no caben en 420 px. */
+        function ajustarAlto(barras) {
+            ctxRA.parentElement.style.height = Math.max(300, barras * 26 + 60) + 'px';
+        }
+
+        function dibujarRA() {
+            const codComp = selectRA.value;
+            if (chartRA) chartRA.destroy();
+
+            if (!codComp) {
+                // Cumplimiento de cada competencia, contando sus resultados por estado.
+                const comps = data.por_competencia.map(c => c.codigo);
+                const cuenta = estado => comps.map(cod =>
+                    data.calificaciones.filter(x => x.cod_competencia === cod && x.jui_evaluativo === estado).length
+                );
+
+                ajustarAlto(comps.length);
+                chartRA = new Chart(ctxRA, {
+                    type: 'bar',
+                    data: {
+                        labels: comps,
+                        datasets: Object.keys(COLOR_ESTADO).map(estado => ({
+                            label: estado,
+                            data: cuenta(estado),
+                            backgroundColor: COLOR_ESTADO[estado],
+                            borderRadius: 3,
+                        })),
+                    },
+                    options: {
+                        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: '#94a3b8', boxWidth: 12 } },
+                            tooltip: { callbacks: { title: items => {
+                                const c = data.por_competencia[items[0].dataIndex];
+                                return APP.truncate(c.codigo + ' - ' + c.nombre, 80);
+                            } } },
+                        },
+                        scales: {
+                            x: { stacked: true, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#94a3b8', precision: 0 } },
+                            y: { stacked: true, grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+                        },
+                    },
+                });
+                leyendaRA.textContent = `${data.total} resultados de aprendizaje en ${comps.length} competencias. Elige una competencia para ver sus resultados uno a uno.`;
+                return;
+            }
+
+            // Una barra por resultado de la competencia elegida.
+            const resultados = data.calificaciones.filter(x => x.cod_competencia === codComp);
+            ajustarAlto(resultados.length);
+            chartRA = new Chart(ctxRA, {
+                type: 'bar',
+                data: {
+                    labels: resultados.map(r => r.cod_resultado),
+                    datasets: [{
+                        label: 'Estado',
+                        data: resultados.map(() => 100),
+                        backgroundColor: resultados.map(r => COLOR_ESTADO[r.jui_evaluativo] || '#64748b'),
+                        borderRadius: 3,
+                    }],
+                },
+                options: {
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: {
+                            title: items => APP.truncate(resultados[items[0].dataIndex].nombre_resultado, 90),
+                            label: item => {
+                                const r = resultados[item.dataIndex];
+                                return r.jui_evaluativo + (r.nombre_funcionario ? ' · ' + r.nombre_funcionario : '');
+                            },
+                        } },
+                    },
+                    scales: {
+                        x: { max: 100, grid: { display: false }, ticks: { display: false } },
+                        y: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+                    },
+                },
+            });
+
+            const aprobados = resultados.filter(r => r.jui_evaluativo === 'APROBADO').length;
+            leyendaRA.textContent = `${aprobados} de ${resultados.length} resultados aprobados en esta competencia. Verde: aprobado · ámbar: por evaluar · rojo: no aprobado.`;
+        }
+
+        selectRA.addEventListener('change', dibujarRA);
+        dibujarRA();
     } catch (e) {
         console.error(e);
     }

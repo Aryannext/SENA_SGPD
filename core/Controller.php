@@ -62,7 +62,7 @@ abstract class Controller
      */
     protected function redirect(string $uri): void
     {
-        header('Location: /SENA_SGPD' . $uri);
+        header('Location: ' . \Core\Router::BASE_PATH . $uri);
         exit;
     }
 

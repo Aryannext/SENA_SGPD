@@ -10,10 +10,25 @@ declare(strict_types=1);
 // ── Autoload ────────────────────────────────────────────────────────────────
 require_once __DIR__ . '/vendor/autoload.php';
 
-// ── Session ─────────────────────────────────────────────────────────────────
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+// ── Sesión ──────────────────────────────────────────────────────────────────
+// La cookie se emite con HttpOnly y SameSite=Strict (RNF-10).
+Core\Auth::iniciarSesion();
+
+// ── Cabeceras de seguridad (RNF-10) ─────────────────────────────────────────
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: SAMEORIGIN');
+header('Referrer-Policy: same-origin');
+header(
+    "Content-Security-Policy: default-src 'self'; "
+    . "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; "
+    . "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; "
+    . "font-src 'self' https://cdnjs.cloudflare.com; "
+    . "img-src 'self' data:; "
+    . "connect-src 'self'; "
+    . "frame-ancestors 'self'; "
+    . "base-uri 'self'; "
+    . "form-action 'self'"
+);
 
 // ── Router Setup ────────────────────────────────────────────────────────────
 // Las rutas se definen en routes.php para que puedan cargarse sin despachar
@@ -35,6 +50,18 @@ if ($match === null) {
 $controllerClass = $match['controller'];
 $action          = $match['action'];
 $params          = $match['params'];
+$esApi           = str_starts_with($match['uri'], '/api/');
+
+// ── Guardias de seguridad ───────────────────────────────────────────────────
+// Toda ruta que no esté marcada como pública exige sesión iniciada (RNF-06), y
+// toda escritura exige además un token CSRF válido (RNF-07).
+if (!$match['publica']) {
+    Core\Auth::exigirSesion($esApi, $uri);
+}
+
+if ($method === 'POST') {
+    Core\Auth::exigirTokenCsrf($esApi);
+}
 
 if (!class_exists($controllerClass)) {
     http_response_code(500);

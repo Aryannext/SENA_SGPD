@@ -12,20 +12,29 @@ namespace Core;
  */
 final class Router
 {
+    /**
+     * Subdirectorio en el que vive la aplicacion.
+     * En la raiz de un dominio debe quedar como cadena vacia.
+     */
+    public const BASE_PATH = '/SENA_SGPD';
+
     /** @var array<string, array{controller: string, action: string, pattern: string}> */
     private array $routes = [];
 
-    public function get(string $uri, string $controller, string $action): void
+    /**
+     * @param bool $publica Accesible sin iniciar sesión (solo el acceso al sistema)
+     */
+    public function get(string $uri, string $controller, string $action, bool $publica = false): void
     {
-        $this->addRoute('GET', $uri, $controller, $action);
+        $this->addRoute('GET', $uri, $controller, $action, $publica);
     }
 
-    public function post(string $uri, string $controller, string $action): void
+    public function post(string $uri, string $controller, string $action, bool $publica = false): void
     {
-        $this->addRoute('POST', $uri, $controller, $action);
+        $this->addRoute('POST', $uri, $controller, $action, $publica);
     }
 
-    private function addRoute(string $method, string $uri, string $controller, string $action): void
+    private function addRoute(string $method, string $uri, string $controller, string $action, bool $publica = false): void
     {
         // Convert URI pattern like /aprendiz/{id} to regex
         $pattern = preg_replace('/\{([a-zA-Z_]+)\}/', '(?P<$1>[^/]+)', $uri);
@@ -38,6 +47,7 @@ final class Router
             'pattern'    => $pattern,
             'method'     => $method,
             'uri'        => $uri,
+            'publica'    => $publica,
         ];
     }
 
@@ -66,7 +76,7 @@ final class Router
         $uri = rtrim($uri, '/') ?: '/';
 
         // Remove base path (e.g., /SENA_SGPD)
-        $basePath = '/SENA_SGPD';
+        $basePath = self::BASE_PATH;
         if (str_starts_with($uri, $basePath)) {
             $uri = substr($uri, strlen($basePath)) ?: '/';
         }
@@ -83,6 +93,8 @@ final class Router
                     'controller' => $route['controller'],
                     'action'     => $route['action'],
                     'params'     => $params,
+                    'publica'    => $route['publica'] ?? false,
+                    'uri'        => $route['uri'],
                 ];
             }
         }

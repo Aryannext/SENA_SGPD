@@ -53,6 +53,25 @@ return [
 ];
 ```
 
+### Paso 4.5: Crear el primer usuario
+
+El sistema no es accesible sin iniciar sesion (RNF-06). Sobre una instalacion existente,
+aplica antes la migracion:
+
+```bash
+mysql -u root -p sistema_sena < docs/migraciones/2026-09-10_usuarios.sql
+```
+
+Ademas de la tabla `usuario`, esa migracion restablece dos reglas de negocio que solo
+estaban validadas en PHP: `aprendiz.estado` pasa a ser obligatorio (RN-04) y se anade la
+clave unica que impide que un programa tenga dos proyectos formativos (RN-09).
+
+Luego crea el usuario administrador:
+
+```bash
+php tools/crear-usuario.php admin ADMIN
+```
+
 ### Paso 5: Verificar Apache mod_rewrite
 Asegúrate de que el módulo `rewrite_module` esté activado en WampServer:
 - Clic izquierdo en el ícono de WampServer → Apache → Apache modules → `rewrite_module` ✓

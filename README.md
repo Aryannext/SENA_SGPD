@@ -140,7 +140,38 @@ El proyecto utiliza librerías de PHP (`PhpSpreadsheet` y `PdfParser`) que deben
 
 ---
 
-### 🤖 Paso 4: Encender la Inteligencia Artificial Local (Ollama)
+### 🔐 Paso 3.5: Crear tu usuario
+
+El sistema exige iniciar sesión: contiene datos personales de aprendices y ninguna
+pantalla es accesible sin credenciales.
+
+Si ya tenías el sistema instalado desde antes, aplica primero la migración que añade la
+tabla de usuarios:
+
+```bash
+mysql -u root -p sistema_sena < docs/migraciones/2026-09-10_usuarios.sql
+```
+
+*(Si acabas de importar `docs/SGPD_SENA.sql`, la tabla ya está creada y puedes saltarte
+ese comando.)*
+
+Ahora crea tu usuario desde la terminal:
+
+```bash
+php tools/crear-usuario.php admin ADMIN
+```
+
+Te pedirá tu nombre y una contraseña de al menos 8 caracteres, que **no** se acepta como
+argumento para que no quede en el historial de la terminal. Los roles disponibles son
+`ADMIN`, `COORDINADOR` e `INSTRUCTOR`; solo los dos primeros pueden eliminar fichas.
+
+> [!NOTE]
+> No hay instalador web que cree al primer administrador: un formulario así es una puerta
+> abierta si alguien olvida borrarlo. Por eso se hace por consola.
+
+---
+
+## 🤖 Paso 4: Encender la Inteligencia Artificial Local (Ollama)
 
 Para que el asistente **SENA-IA** y la predicción de riesgo de deserción funcionen, el motor de IA local debe estar activo.
 
@@ -193,7 +224,7 @@ Con tu Apache, MySQL, Ollama y el servidor de voz en ejecución, abre tu navegad
 
 👉 **[http://localhost/SENA_SGPD](http://localhost/SENA_SGPD)**
 
-¡Deberías ver de inmediato el **Dashboard Principal del SGPD** cargado con métricas, gráficas interactivas y acceso total a todas las herramientas!
+Te recibirá la pantalla de acceso. Entra con el usuario que creaste en el paso 3.5 y verás el **Dashboard Principal del SGPD** con sus métricas, gráficas interactivas y todas las herramientas.
 
 ---
 

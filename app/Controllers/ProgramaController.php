@@ -179,6 +179,9 @@ final class ProgramaController extends Controller
      */
     public function deleteFicha(): void
     {
+        // Borra en cascada aprendices y calificaciones: no es para cualquiera.
+        \Core\Auth::exigirRol(['ADMIN', 'COORDINADOR']);
+
         $body = $this->getJsonBody();
         $idFicha = (int) ($body['id_ficha'] ?? 0);
         if ($idFicha <= 0) {

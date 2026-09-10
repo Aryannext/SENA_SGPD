@@ -76,21 +76,29 @@ seis vectores de prueba: ninguno explotable.
 
 ### RNF-06 · Autenticación y autorización
 **Objetivo:** toda ruta que lea o modifique datos personales exige sesión iniciada, y
-las operaciones destructivas exigen además el rol adecuado. · **Estado:** ⛔
+las operaciones destructivas exigen además el rol adecuado. · **Estado:** ✅
 
-Ninguna de las 32 rutas valida sesión, rol ni token. Verificado: `POST
-/api/programa/delete-ficha` responde `{"success":true}` sin credencial alguna, y los
-endpoints de creación de fases y actividades aceptan escrituras anónimas.
+Solo `GET /login` y `POST /login` son públicas; las otras 37 rutas pasan por el guardián
+del front controller. Las rutas web redirigen a `/login`, las de API responden 401.
+Eliminar una ficha exige `ADMIN` o `COORDINADOR`.
 
-**Depende de:** RF-40, RF-41. **Ver:** vulnerabilidad **V-02**.
+**Verificado:** sin sesión, `/dashboard` responde 302 y `/api/dashboard/stats` 401;
+con sesión de instructor, `POST /api/programa/delete-ficha` responde 403.
+
+**Historial:** vulnerabilidad **V-02**, corregida. Antes ninguna ruta validaba nada y
+`delete-ficha` respondía `{"success":true}` a una petición anónima.
 
 ### RNF-07 · Protección contra CSRF
-**Objetivo:** toda petición de escritura lleva un token de un solo uso ligado a la
-sesión. · **Estado:** ⛔
+**Objetivo:** toda petición de escritura lleva un token ligado a la sesión.
+· **Estado:** ✅
 
-Ningún endpoint exige token ni verifica `Content-Type`, de modo que un formulario
-alojado en otro sitio puede disparar operaciones destructivas desde el navegador de un
-instructor autenticado.
+Toda petición `POST` —incluida la de acceso— exige un token válido. Se acepta en la
+cabecera `X-CSRF-Token` (peticiones de JavaScript) o en el campo `_csrf` (formularios y
+cuerpos JSON), y se compara con `hash_equals()`. El token se rota al iniciar sesión,
+junto con el identificador.
+
+**Verificado:** `POST /api/programa/delete-ficha` sin token responde 419; con token
+válido y rol suficiente, 200.
 
 ### RNF-08 · Escapado de la salida
 **Objetivo:** ningún dato almacenado llega al navegador sin escapar según su contexto.
@@ -121,11 +129,16 @@ archivos se guardan como `import_<timestamp>.xls`, un patrón enumerable.
 **Objetivo:** las respuestas incluyen `Content-Security-Policy`,
 `X-Content-Type-Options`, `X-Frame-Options` y `Referrer-Policy`; la cookie de sesión se
 emite con `HttpOnly`, `SameSite=Strict` y, en producción, `Secure`; los recursos de CDN
-declaran `integrity`. · **Estado:** ⛔
+declaran `integrity`. · **Estado:** 🟡
 
-Ninguna de las cuatro cabeceras está presente. `session_start()` se invoca sin
-configurar los atributos de la cookie. Los cinco recursos externos se cargan sin
-verificación de integridad. Una CSP habría contenido el impacto de V-01.
+Las cuatro cabeceras se emiten desde el front controller y la cookie lleva `HttpOnly`,
+`SameSite=Strict` y `Secure` bajo HTTPS.
+
+**Lo que falta:** los recursos de CDN siguen sin `integrity`, y la CSP admite
+`'unsafe-inline'` en scripts y estilos porque las vistas llevan JavaScript y estilos
+embebidos. Retirarlo exige mover ese código a archivos propios; mientras tanto la CSP
+protege menos de lo que podría, aunque ya limita `connect-src`, `form-action`,
+`base-uri` y `frame-ancestors` al propio origen.
 
 ---
 
@@ -303,16 +316,18 @@ archivos y estructura de la base de datos.
 | Categoría | ✅ | 🟡 | ⛔ | Total |
 |---|--:|--:|--:|--:|
 | Rendimiento | 2 | 1 | 1 | 4 |
-| Seguridad | 2 | 0 | 4 | 6 |
+| Seguridad | 4 | 1 | 1 | 6 |
 | Protección de datos | 0 | 3 | 0 | 3 |
 | Usabilidad | 2 | 1 | 1 | 4 |
 | Compatibilidad y portabilidad | 2 | 2 | 1 | 5 |
 | Mantenibilidad | 1 | 2 | 1 | 4 |
 | Fiabilidad y operación | 1 | 0 | 3 | 4 |
-| **Total** | **10** | **9** | **11** | **30** |
+| **Total** | **12** | **10** | **8** | **30** |
 
-**Lectura del resumen.** La seguridad y la operación son las dos dimensiones más
-débiles, y no por descuido de implementación sino por una decisión de alcance: la
-versión 2.0 se declaró sin autenticación. Mientras RNF-06 siga en ⛔, el sistema es
-apto para demostración académica y **no** para manejar datos reales de aprendices en un
-servidor accesible.
+**Lectura del resumen.** La seguridad dejó de ser la dimensión más débil: con RNF-06 y
+RNF-07 cumplidos, el sistema ya distingue quién entra y qué puede hacer. Solo queda
+RNF-09, la validación real de los archivos que se suben.
+
+La dimensión más débil es ahora **fiabilidad y operación**: no hay transacciones
+(RNF-27), no hay registro de errores (RNF-29) y no hay procedimiento de respaldo
+(RNF-30). Ninguna impide usar el sistema, pero las tres duelen el día que algo falle.

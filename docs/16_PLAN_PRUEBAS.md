@@ -153,7 +153,7 @@ con categoría `Crítico`.
 | **CP-18** | Resultados en deuda | Solo los que el grupo ya aprobó y el aprendiz no | ✅ ejecutado |
 | **CP-19** | Programas con estadísticas | Fichas, aprendices, activos y retirados por programa | ✅ ejecutado |
 | **CP-20** | Detalle de programa | Sus fichas con avance | ✅ ejecutado |
-| **CP-21** | Eliminar ficha | Borrado transaccional, con permiso y confirmación | ❌ **falla** — anónimo y sin transacción (V-02) |
+| **CP-21** | Eliminar ficha | Borrado transaccional, con permiso y confirmación | 🟡 exige rol ADMIN/COORDINADOR; sigue sin transacción |
 
 ---
 
@@ -219,7 +219,10 @@ estando el microservicio apagado.
 
 | Caso | Regla | Resultado esperado | Estado |
 |---|---|---|---|
-| **CP-38** | RF-40 · autenticación | Ruta protegida sin sesión redirige al inicio de sesión | ❌ **falla** — sin implementar |
+| **CP-38** | RF-40 · autenticación | Ruta protegida sin sesión redirige al inicio de sesión | ✅ **automatizado** |
+| **CP-57** | RF-41 · permisos por rol | Un instructor no puede eliminar una ficha | ✅ **automatizado** |
+| **CP-58** | RNF-07 · CSRF | Toda escritura sin token válido se rechaza con 419 | ✅ **automatizado** |
+| **CP-59** | RNF-06 · contraseñas | Se almacenan con bcrypt, nunca en claro | ✅ **automatizado** |
 | **CP-39** | RN-01 | Aprendiz sin tipo de documento es rechazado | ⏳ pendiente |
 | **CP-40** | RN-02 | Documento duplicado es rechazado | ⏳ pendiente |
 | **CP-41** | RN-03 | Documento repetido en otra ficha traslada al aprendiz | ✅ ejecutado — comportamiento confirmado |
@@ -276,7 +279,9 @@ de los 14 patrones de interpolación sin escapar que se corrigieron.
 **Resultado esperado:** las respuestas incluyen `Content-Security-Policy`,
 `X-Content-Type-Options`, `X-Frame-Options` y `Referrer-Policy`; la cookie de sesión
 lleva `HttpOnly` y `SameSite`.
-**Estado:** ❌ **falla** — ninguna cabecera presente (RNF-10).
+**Estado:** ✅ **automatizado** — las cuatro cabeceras se emiten y la cookie lleva
+`HttpOnly`, `SameSite=Strict` y `Secure` bajo HTTPS. Queda pendiente el `integrity` de
+los recursos de CDN y retirar `'unsafe-inline'` de la CSP (RNF-10).
 
 ---
 
@@ -284,19 +289,21 @@ lleva `HttpOnly` y `SameSite`.
 
 | Resultado | Casos |
 |---|--:|
-| ✅ **Automatizado** | 14 |
+| ✅ **Automatizado** | 19 |
 | ✅ Pasa, ejecutado a mano | 19 |
-| ❌ Falla | 6 |
+| 🟡 Parcial | 1 |
+| ❌ Falla | 3 |
 | ⏳ Pendiente | 17 |
-| **Total** | **56** |
+| **Total** | **59** |
 
 ### Lo que hay automatizado
 
-`php tests/run.php` — **52 pruebas, 31 s.**
+`php tests/run.php` — **65 pruebas, 24 s.**
 
 | Archivo | Cubre | Pruebas |
 |---|---|--:|
 | `tests/Contract/RutasTest.php` | CP-36, CP-51 | 6 |
+| `tests/Contract/AutenticacionTest.php` | CP-38, CP-53, CP-57, CP-58, CP-59 | 15 |
 | `tests/Unit/ImportadorTest.php` | CP-47, CP-48, CP-54 | 14 |
 | `tests/Unit/InsightsTest.php` | CP-10, CP-13 | 8 |
 | `tests/Unit/NovedadRetiroTest.php` | CP-56 | 4 |
@@ -327,11 +334,9 @@ descubrió al escribir `ImportadorTest` y quedó cubierto por CP-54.
 | Caso | Defecto | Requisito |
 |---|---|---|
 | CP-07 | F-11 · el resumen no distingue nuevos de actualizados | RF-06 |
-| CP-21 | V-02 · borrado anónimo y sin transacción | RF-20, RNF-06 |
+| CP-21 | Sin transacción en el borrado en cascada (RNF-27) | RF-20 |
 | CP-24 | Sin validación al crear fase y actividad | RF-23, RF-24 |
-| CP-38 | Sin autenticación | RF-40, RNF-06 |
-| CP-42 | RN-04 sin aplicar | RN-04 |
-| CP-53 | Sin cabeceras de seguridad | RNF-10 |
 
-Cuatro de los seis dependen de la misma historia sin implementar: **HU-19, el control
-de acceso**.
+CP-42 (RN-04, el estado obligatorio del aprendiz) deja de fallar en instalaciones que
+apliquen `docs/migraciones/2026-09-10_usuarios.sql`, que además añade la clave única que
+faltaba para RN-09.

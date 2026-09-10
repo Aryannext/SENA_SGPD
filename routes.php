@@ -14,6 +14,11 @@ declare(strict_types=1);
 
 $router = new Core\Router();
 
+// Acceso al sistema — las únicas rutas públicas.
+$router->get('/login',              'App\Controllers\AuthController', 'login',     publica: true);
+$router->post('/login',             'App\Controllers\AuthController', 'loginPost', publica: true);
+$router->get('/logout',             'App\Controllers\AuthController', 'logout');
+
 // Web routes
 $router->get('/',                    'App\Controllers\DashboardController', 'index');
 $router->get('/dashboard',          'App\Controllers\DashboardController', 'index');

@@ -400,13 +400,44 @@ Degrada a entrada de texto en navegadores sin soporte.
 
 ---
 
+## 11.9.bis Módulo: Control de acceso
+
+### RF-40 · Iniciar y cerrar sesión
+**Prioridad:** M · **Estado:** ✅
+
+- **Criterio de aceptación:** sin sesión, toda ruta web redirige a `/login` y toda ruta
+  de API responde HTTP 401; el mensaje de error es el mismo para usuario inexistente y
+  contraseña incorrecta, para no permitir enumerar usuarios.
+- **Realización:** `Core\Auth`, `AuthController`, tabla `usuario`.
+- **Contraseñas:** `password_hash()` con bcrypt. El sistema nunca almacena ni registra
+  la contraseña en claro.
+- **Sesión:** cookie con `HttpOnly` y `SameSite=Strict`, más `Secure` cuando la petición
+  llega por HTTPS. El identificador se regenera al entrar, para cerrar la fijación de
+  sesión, y el token CSRF se rota con él.
+- **Primer usuario:** se crea por consola con `php tools/crear-usuario.php <usuario> ADMIN`.
+  Deliberadamente no hay instalador web: uno que cree al primer administrador es una
+  puerta abierta si alguien olvida borrarlo.
+- **Verificación:** sin sesión, `/dashboard` responde 302 a `/login` y
+  `/api/dashboard/stats` responde 401. Tras entrar, el sistema devuelve al usuario a la
+  ruta que había pedido.
+
+### RF-41 · Permisos por rol
+**Prioridad:** M · **Estado:** ✅
+
+Tres roles: `ADMIN`, `COORDINADOR` e `INSTRUCTOR`.
+
+- **Criterio de aceptación:** eliminar una ficha exige `ADMIN` o `COORDINADOR`; un
+  `INSTRUCTOR` recibe HTTP 403 sin que la operación se ejecute.
+- **Verificación:** con sesión de instructor, `POST /api/programa/delete-ficha` responde
+  403; el mismo usuario sigue consultando el tablero con normalidad.
+
+---
+
 ## 11.10 Requisitos diferidos
 
 | Código | Requisito | Motivo |
 |--------|-----------|--------|
-| RF-40 | Autenticación e inicio de sesión | `W` en v2.0; **obligatorio** antes de cualquier despliegue real (RNF-06) |
-| RF-41 | Perfiles y permisos por rol | Depende de RF-40 |
-| RF-42 | Registro de auditoría de acciones | Depende de RF-40 |
+| RF-42 | Registro de auditoría de acciones | Queda pendiente: hay identidad, falta la bitácora de quién hizo qué |
 | RF-43 | Conexión directa con Sofía Plus | Fuera de alcance: no hay API pública |
 | RF-44 | Edición manual de juicios evaluativos | Decisión de diseño: la fuente de verdad es Sofía Plus |
 
@@ -416,10 +447,10 @@ Degrada a entrada de texto en navegadores sin soporte.
 
 | Estado | Requisitos | % |
 |--------|-----------:|--:|
-| ✅ Implementado | 35 | 89,7 % |
-| 🟡 Parcial | 4 | 10,3 % |
+| ✅ Implementado | 37 | 90,2 % |
+| 🟡 Parcial | 4 | 9,8 % |
 | ⛔ No implementado | 0 | 0 % |
-| **Total (RF-01 … RF-39)** | **39** | **100 %** |
+| **Total (RF-01 … RF-41)** | **41** | **100 %** |
 
 **Ya no queda ningún requisito sin implementar.** El módulo de deserción (RF-29 a RF-32)
 y la estimación con IA (RF-33) se cerraron derivando las novedades de retiro del estado

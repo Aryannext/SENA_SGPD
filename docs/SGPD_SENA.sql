@@ -117,3 +117,18 @@ CREATE TABLE novedad_retiro (
   FOREIGN KEY (id_funcionario) REFERENCES funcionario(id_funcionario) ON DELETE SET NULL,
   FOREIGN KEY (id_fase) REFERENCES fase(id_fase) ON DELETE SET NULL
 ) ENGINE=InnoDB;
+-- Usuarios del sistema (RF-40, RF-41 · RNF-06).
+-- Se mantiene aparte de `funcionario`: los funcionarios llegan importados del
+-- Excel de Sofia Plus y no son necesariamente quienes usan el sistema.
+CREATE TABLE usuario (
+  id_usuario     INT AUTO_INCREMENT PRIMARY KEY,
+  usuario        VARCHAR(50)  NOT NULL UNIQUE,
+  password_hash  VARCHAR(255) NOT NULL,
+  nombre         VARCHAR(150) NOT NULL,
+  rol            ENUM('ADMIN','COORDINADOR','INSTRUCTOR') NOT NULL DEFAULT 'INSTRUCTOR',
+  activo         TINYINT(1)   NOT NULL DEFAULT 1,
+  id_funcionario INT          NULL,
+  creado_en      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  ultimo_acceso  DATETIME     NULL,
+  FOREIGN KEY (id_funcionario) REFERENCES funcionario(id_funcionario) ON DELETE SET NULL
+) ENGINE=InnoDB;

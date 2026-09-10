@@ -445,7 +445,7 @@ palabras, **para** obtener respuestas sin construir consultas ni filtros.
 **Como** instructor, **quiero** iniciar sesión con mis credenciales,
 **para** que solo el personal autorizado vea los datos de los aprendices.
 
-**Prioridad:** M · **Estado:** ⛔ · **Requisitos:** RF-40, RF-41 · **RNF:** RNF-06, RNF-07
+**Prioridad:** M · **Estado:** ✅ · **Requisitos:** RF-40, RF-41 · **RNF:** RNF-06, RNF-07
 
 **Criterios de aceptación**
 
@@ -459,13 +459,18 @@ palabras, **para** obtener respuestas sin construir consultas ni filtros.
    nombre, **cuando** llega al servidor,
    **entonces** se rechaza por falta de un token válido.
 
-> ⚠️ Ningún criterio se cumple. Ninguna de las 32 rutas valida sesión, rol ni token, y
-> se verificó que `POST /api/programa/delete-ficha` responde `{"success":true}` sin
-> credencial alguna. Vulnerabilidad **V-02**.
+> Ningún criterio se cumplía: ninguna de las 32 rutas validaba sesión, rol ni token, y
+> se verificó que `POST /api/programa/delete-ficha` respondía `{"success":true}` sin
+> credencial alguna. Vulnerabilidad **V-02**, corregida.
 >
-> **Es la historia bloqueante para cualquier despliegue con datos reales.** Mientras
-> siga sin implementar, el sistema es apto para demostración académica y para ejecución
-> local, no para un servidor accesible.
+> Los tres criterios se comprobaron ejecutando el sistema: sin sesión `/dashboard`
+> responde 302 y `/api/dashboard/stats` responde 401; con sesión de instructor, borrar
+> una ficha responde 403; sin token CSRF, cualquier escritura responde 419.
+>
+> Probando el acceso en un navegador real aparecieron dos defectos que las pruebas por
+> consola no habían visto: el destino guardado incluía la ruta base y quedaba duplicado
+> al redirigir, y pedir `/logout` sin sesión hacía que entrar cerrara la sesión recién
+> abierta. Ambos corregidos, con prueba de regresión.
 
 ---
 
@@ -479,11 +484,10 @@ palabras, **para** obtener respuestas sin construir consultas ni filtros.
 | 4 · Estructurar el proyecto formativo | 2 | 1 | 1 | 0 |
 | 5 · Entender la deserción | 1 | 1 | 0 | 0 |
 | 6 · Consultar con ayuda de la IA | 3 | 3 | 0 | 0 |
-| 7 · Controlar el acceso | 1 | 0 | 0 | 1 |
-| **Total** | **19** | **16** | **2** | **1** |
+| 7 · Controlar el acceso | 1 | 1 | 0 | 0 |
+| **Total** | **19** | **17** | **2** | **0** |
 
-**HU-19, el control de acceso, es la única historia sin implementar**, y es la que
-bloquea cualquier despliegue con datos reales de aprendices.
+**No queda ninguna historia sin implementar.**
 
 Las dos parciales incumplen un criterio cada una, ninguno exigido por el enunciado:
 HU-02 no distingue registros nuevos de actualizados (F-11) y HU-13 reemplaza la

@@ -69,7 +69,27 @@ function isActive(string $path, string $currentUri, string $basePath): string {
         </div>
     </nav>
 
-    <div style="padding: 16px 22px; border-top: 1px solid var(--border); font-size: 10px; color: var(--text-muted);">
+    <?php $sesion = \Core\Auth::usuario(); ?>
+    <?php if ($sesion !== null): ?>
+        <div style="padding: 14px 22px; border-top: 1px solid var(--border); display:flex; align-items:center; gap:10px;">
+            <div style="width:32px;height:32px;border-radius:50%;background:var(--accent);color:#07130b;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:0 0 auto;">
+                <?= htmlspecialchars(mb_strtoupper(mb_substr($sesion['nombre'], 0, 1)), ENT_QUOTES, 'UTF-8') ?>
+            </div>
+            <div style="min-width:0;flex:1;">
+                <div style="font-size:12px;font-weight:600;color:var(--text-bright);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                    <?= htmlspecialchars($sesion['nombre'], ENT_QUOTES, 'UTF-8') ?>
+                </div>
+                <div style="font-size:10px;color:var(--text-muted);letter-spacing:.05em;">
+                    <?= htmlspecialchars($sesion['rol'], ENT_QUOTES, 'UTF-8') ?>
+                </div>
+            </div>
+            <a href="<?= $basePath ?>/logout" title="Cerrar sesión" style="color:var(--text-muted);padding:6px;">
+                <i class="fas fa-right-from-bracket"></i>
+            </a>
+        </div>
+    <?php endif; ?>
+
+    <div style="padding: 12px 22px 16px; border-top: 1px solid var(--border); font-size: 10px; color: var(--text-muted);">
         SGPD v2.0 — ADSO 2480542
     </div>
 </aside>

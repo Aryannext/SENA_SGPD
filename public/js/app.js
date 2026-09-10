@@ -7,6 +7,28 @@ const APP = {
     basePath: '/SENA_SGPD',
 
     /**
+     * Token CSRF de la sesión, publicado por el layout.
+     * Acompaña a toda petición de escritura (RNF-07).
+     * @returns {string}
+     */
+    csrf() {
+        return document.querySelector('meta[name="csrf-token"]')?.content || '';
+    },
+
+    /**
+     * Si la sesión caducó, el servidor responde 401 o 419. En ese caso se
+     * lleva al usuario al acceso en vez de dejarlo con un error opaco.
+     * @param {Response} res
+     */
+    comprobarSesion(res) {
+        if (res.status === 401 || res.status === 419) {
+            window.location.href = this.basePath + '/login';
+            throw new Error('Sesión expirada');
+        }
+        return res;
+    },
+
+    /**
      * Escapa una cadena para insertarla en HTML, tanto en texto como dentro de
      * un atributo entrecomillado. TODO dato proveniente de la base de datos
      * debe pasar por aquí antes de llegar a innerHTML.
@@ -62,7 +84,7 @@ const APP = {
      * AJAX GET returning JSON.
      */
     async get(url) {
-        const res = await fetch(this.basePath + url);
+        const res = this.comprobarSesion(await fetch(this.basePath + url));
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
     },
@@ -71,11 +93,11 @@ const APP = {
      * AJAX POST with JSON body, returning JSON.
      */
     async post(url, data = {}) {
-        const res = await fetch(this.basePath + url, {
+        const res = this.comprobarSesion(await fetch(this.basePath + url, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': this.csrf() },
             body: JSON.stringify(data),
-        });
+        }));
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
     },
@@ -84,10 +106,11 @@ const APP = {
      * AJAX POST with FormData (file uploads).
      */
     async postForm(url, formData) {
-        const res = await fetch(this.basePath + url, {
+        const res = this.comprobarSesion(await fetch(this.basePath + url, {
             method: 'POST',
+            headers: { 'X-CSRF-Token': this.csrf() },
             body: formData,
-        });
+        }));
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
     },

@@ -49,7 +49,7 @@ const Chat = {
         try {
             const response = await fetch(APP.basePath + '/api/chat/send', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': APP.csrf() },
                 body: JSON.stringify({ message }),
             });
 
@@ -123,7 +123,7 @@ const Chat = {
         try {
             const response = await fetch(APP.basePath + '/api/chat/send', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': APP.csrf() },
                 body: JSON.stringify({ message }),
             });
 
