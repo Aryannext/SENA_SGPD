@@ -22,6 +22,40 @@ Servicio Nacional de Aprendizaje — SENA Regional Caquetá
 
 ---
 
+
+---
+
+## Datos de prueba y protección de datos personales
+
+Este repositorio **no contiene reportes reales de Sofía Plus**. Los reportes de
+juicios evaluativos incluyen número de documento, nombres y estado de aprendices
+identificables: son datos personales protegidos por la **Ley 1581 de 2012** y no
+deben versionarse ni publicarse.
+
+Para probar la importación, ejecutar la demostración o desarrollar, use el archivo
+anonimizado incluido:
+
+```
+docs/Reporte_Juicios_Evaluativos_MUESTRA.xlsx
+```
+
+Conserva la estructura exacta del reporte de Sofía Plus y produce **los mismos
+conteos** que el archivo original (31 aprendices, 20 competencias, 75 resultados de
+aprendizaje, 14 funcionarios y 2.325 calificaciones), pero con documentos, nombres
+de aprendices y nombres de instructores ficticios. El resto —programa, ficha,
+competencias, resultados y juicios— es idéntico al real.
+
+### Si trabaja con un reporte real
+
+1. Manténgalo **fuera** de la carpeta del proyecto, o dentro de una ruta ya excluida
+   en `.gitignore`.
+2. `public/uploads/` está excluido del control de versiones: los archivos que suban
+   los usuarios se quedan solo en el servidor.
+3. `tts_server/reference_voice/voice.wav` tampoco se versiona, porque es la voz de
+   una persona real. Cada instalación debe grabar la suya (ver paso 5 del README).
+
+---
+
 **Versión:** 2.0  
 **Ficha:** ADSO 2480542  
 **Última actualización:** Julio 2026

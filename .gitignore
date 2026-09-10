@@ -1,0 +1,41 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Datos personales — NUNCA versionar
+# ─────────────────────────────────────────────────────────────────────────────
+# Los reportes de Sofía Plus contienen documento, nombre y estado de aprendices
+# identificables (Ley 1581 de 2012). Para pruebas y demostración use el archivo
+# anonimizado docs/Reporte_Juicios_Evaluativos_MUESTRA.xlsx.
+/docs/*.xls
+/docs/*.xlsx
+!/docs/Reporte_Juicios_Evaluativos_MUESTRA.xlsx
+
+# Archivos subidos por los usuarios en tiempo de ejecución
+/public/uploads/*
+!/public/uploads/.gitkeep
+
+# Voz de referencia para la clonación TTS: es la voz de una persona real.
+# Cada instalación debe grabar la suya (ver README, paso 5).
+/tts_server/reference_voice/*.wav
+
+# Audio sintetizado (caché regenerable)
+/tts_server/cache/*
+!/tts_server/cache/.gitkeep
+/public/audio/*
+!/public/audio/.gitkeep
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Dependencias y artefactos locales
+# ─────────────────────────────────────────────────────────────────────────────
+/tts_server/venv/
+__pycache__/
+*.pyc
+
+# Configuración con credenciales reales
+/config/database.local.php
+
+# Sistema operativo y editores
+Thumbs.db
+Desktop.ini
+.DS_Store
+.idea/
+.vscode/
+*.swp
