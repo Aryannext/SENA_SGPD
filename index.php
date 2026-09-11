@@ -36,7 +36,17 @@ header(
 $router = require __DIR__ . '/routes.php';
 
 // ── Dispatch ────────────────────────────────────────────────────────────────
-$method = $_SERVER['REQUEST_METHOD'];
+// HEAD es identico a GET salvo que no se devuelve cuerpo (RFC 9110), y PHP ya
+// descarta el cuerpo por su cuenta. Aqui basta con resolver la ruta como si
+// fuera GET.
+//
+// Sin esto, TODA peticion HEAD caia en el 404, porque las rutas se registran
+// como GET o POST y ninguna coincide con HEAD. Lo peor no era el 404 en si:
+// HEAD es el metodo natural de un vigilante de disponibilidad, asi que
+// /salud —que existe precisamente para eso— respondia que no existe. Un
+// monitor daria el sitio por caido estando perfectamente sano.
+$metodoBruto = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$method = $metodoBruto === 'HEAD' ? 'GET' : $metodoBruto;
 $uri    = $_SERVER['REQUEST_URI'];
 
 $match = $router->resolve($uri, $method);
